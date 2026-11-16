@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Servidor - Mock Discord</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../style/config-servidor.css">
+</head>
+<body>
+
+<div class="layout-configuracoes" id="layout-configuracoes">
+    <!-- cabeçalho mobile (aparece abaixo de 768px) -->
+    <header class="cabecalho-mobile">
+        <a href="servidor.html" class="fechar-mobile" aria-label="Voltar para o servidor">
+            <i class="bi bi-x-lg"></i>
+        </a>
+        <h1>Config. do servidor</h1>
+    </header>
+
+    <!--barra lteral equerda (desktop) / menu principal (mobile) -->
+    <aside class="barra-lateral-config" aria-label="Menu de configurações do servidor">
+        <div class="container-menu-lateral">
+            <!-- resumo visual exclusivo do Mobile -->
+            <div class="resumo-servidor-mobile">
+                <div class="icone-mobile" id="icone-preview-mobile">
+                    <i class="bi bi-images"></i>
+                </div>
+                <strong id="nome-servidor-mobile">Comunidade IFC</strong>
+            </div>
+
+            <span class="titulo-grupo-lateral" id="nome-servidor-lateral">Nome do servidor</span>
+            <span class="rotulo-grupo-mobile">Configurações</span>
+
+            <nav class="navegacao-config">
+                <button type="button" class="aba-nav ativa" data-aba="perfil">Perfil do servidor</button>
+                <button type="button" class="aba-nav" data-aba="cargos">Cargos</button>
+                <button type="button" class="aba-nav" data-aba="membros">Membros</button>
+                <button type="button" class="aba-nav" data-aba="convites">Convites</button>
+                <button type="button" class="aba-nav" data-aba="banimentos">Banimentos</button>
+                <button type="button" class="aba-nav perigo" id="btn-excluir-servidor">Excluir servidor</button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- area principal da direita -->
+    <main class="conteudo-config">
+        <div class="topo-fechar">
+            <button type="button" class="btn-voltar-mobile" id="btn-voltar-mobile">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </button>
+            <a href="servidor.html" class="botao-esc" title="Voltar para o servidor">
+                <span class="circulo-esc"><i class="bi bi-x-lg"></i></span>
+                <span class="texto-esc">ESC</span>
+            </a>
+        </div>
+
+        <!-- perfil do servidor -->
+        <section class="painel-aba ativo" id="aba-perfil">
+            <div class="grid-perfil">
+                <!-- Coluna Esquerda: Formulário -->
+                <div class="coluna-formulario">
+                    <h1>Perfil do servidor</h1>
+                    <p class="subtitulo">Personalize seu servidor</p>
+
+                    <form id="form-perfil-servidor" class="formulario-perfil" novalidate>
+                        <div class="grupo-campo">
+                            <label for="input-nome-servidor">Nome</label>
+                            <input type="text" id="input-nome-servidor" value="Comunidade IFC" placeholder="Nome do servidor" maxlength="50" required>
+                            <span class="mensagem-erro" id="erro-nome-servidor"></span>
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label>Ícone</label>
+                            <div class="acoes-icone">
+                                <label for="input-icone-servidor" class="btn-roxo">
+                                    Altere o ícone do servidor
+                                </label>
+                                <input type="file" id="input-icone-servidor" accept="image/*" hidden>
+                                <button type="button" class="btn-cinza-perigo" id="btn-remover-icone">
+                                    Remover o ícone
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label>Faixa</label>
+                            <div class="grade-faixas" id="grade-faixas" role="radiogroup" aria-label="Cor da faixa do servidor">
+                                <button type="button" class="bloco-cor" data-cor="#8B8C5B" style="background-color: #8B8C5B;" aria-label="Verde oliva"></button>
+                                <button type="button" class="bloco-cor" data-cor="#E600FF" style="background-color: #E600FF;" aria-label="Magenta"></button>
+                                <button type="button" class="bloco-cor ativo" data-cor="#D3383B" style="background-color: #D3383B;" aria-label="Vermelho"></button>
+                                <button type="button" class="bloco-cor" data-cor="#C97A16" style="background-color: #C97A16;" aria-label="Laranja"></button>
+                                <button type="button" class="bloco-cor" data-cor="#F7F700" style="background-color: #F7F700;" aria-label="Amarelo"></button>
+                                <button type="button" class="bloco-cor" data-cor="#8A56C2" style="background-color: #8A56C2;" aria-label="Roxo"></button>
+                                <button type="button" class="bloco-cor" data-cor="#2B72C4" style="background-color: #2B72C4;" aria-label="Azul"></button>
+                                <button type="button" class="bloco-cor" data-cor="#14C4A8" style="background-color: #14C4A8;" aria-label="Turquesa"></button>
+                                <button type="button" class="bloco-cor" data-cor="#2E7D1E" style="background-color: #2E7D1E;" aria-label="Verde escuro"></button>
+                                <button type="button" class="bloco-cor" data-cor="#1A1A1A" style="background-color: #1A1A1A;" aria-label="Preto"></button>
+                            </div>
+                        </div>
+
+                        <div class="barra-salvar">
+                            <button type="submit" class="btn-salvar">Salvar alterações</button>
+                            <span class="mensagem-sucesso" id="msg-sucesso-perfil" role="status"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- coluna da direita: preview do card -->
+                <aside class="card-preview" aria-label="Pré-visualização do servidor">
+                    <div class="banner-preview" id="banner-preview" style="background-color: #D3383B;"></div>
+                    <div class="corpo-preview">
+                        <div class="icone-preview" id="icone-preview">
+                            <i class="bi bi-images"></i>
+                        </div>
+                        <h2 id="nome-preview">Comunidade IFC</h2>
+                        <div class="status-preview">
+                            <span><i class="ponto-online"></i> 4 online</span>
+                            <span><i class="ponto-membros"></i> 23 membros</span>
+                        </div>
+                        <small class="data-preview">Desde Jul. de 2023</small>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- Cargos -->
+        <section class="painel-aba" id="aba-cargos">
+            <h1>Cargos</h1>
+            <p class="subtitulo">Gerencie permissões e hierarquia dos membros.</p>
+            <table class="tabela-dados">
+                <thead>
+                    <tr>
+                        <th>Cargo</th>
+                        <th>Membros</th>
+                        <th>Permissão Principal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Administrador</strong></td>
+                        <td>1</td>
+                        <td>Gerenciar servidor, canais e banimentos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Moderador</strong></td>
+                        <td>2</td>
+                        <td>Gerenciar mensagens e convites</td>
+                    </tr>
+                    <tr>
+                        <td><strong>@everyone</strong></td>
+                        <td>20</td>
+                        <td>Enviar mensagens e entrar em canais de voz</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Membros -->
+        <section class="painel-aba" id="aba-membros">
+            <h1>Membros</h1>
+            <p class="subtitulo">Participantes do servidor (23 membros).</p>
+            <ul class="lista-simples">
+                <li><strong>Matteo Thomé</strong> — Administrador</li>
+                <li><strong>Filipe Nunes</strong> — Moderador</li>
+                <li><strong>João Veloso</strong> — Moderador</li>
+            </ul>
+        </section>
+
+        <!-- Convites -->
+        <section class="painel-aba" id="aba-convites">
+            <h1>Convites</h1>
+            <p class="subtitulo">Links de convite ativos para este servidor.</p>
+            <div class="caixa-convite">
+                <code>https://mock-discord.local/convite/ifc-2026</code>
+                <button type="button" class="btn-roxo" id="btn-copiar-convite">Copiar</button>
+            </div>
+        </section>
+
+        <!-- Banimentos -->
+        <section class="painel-aba" id="aba-banimentos">
+            <h1>Banimentos</h1>
+            <p class="subtitulo">Nenhum usuário banido neste servidor.</p>
+        </section>
+
+        <footer class="rodape-academico">
+            Clone simplificado do Discord para trabalho acadêmico (IFC Campus Concórdia). Dados fictícios.
+        </footer>
+    </main>
+</div>
+
+<script src="../js/config-servidor.js"></script>
+</body>
+</html>
