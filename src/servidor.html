@@ -9,143 +9,143 @@
 </head>
 <body>
 
-<div class="app-layout">
-    <!-- 1. Barra Lateral de Servidores -->
-    <nav class="servers-rail" aria-label="Lista de servidores">
-        <a href="index.php" class="server-icon home-icon" title="Página Inicial / Amigos">
+<div class="layout-aplicativo">
+    <!-- barra lateral servidores -->
+    <nav class="barra-servidores" aria-label="Lista de servidores">
+        <a href="index.php" class="icone-servidor icone-inicio" title="Página Inicial / Amigos">
             <i class="bi bi-discord"></i>
         </a>
-        <div class="rail-divider"></div>
-        <button class="server-icon active" title="Comunidade IFC">
-            <span class="fallback-icon"><i class="bi bi-people-fill"></i></span>
+        <div class="divisoria-servidores"></div>
+        <button class="icone-servidor ativo" title="Comunidade IFC">
+            <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
         </button>
-        <button class="server-icon" title="Grupo de Estudos">
-            <span class="fallback-icon"><i class="bi bi-book-half"></i></span>
+        <button class="icone-servidor" title="Grupo de Estudos">
+            <span class="icone-reserva"><i class="bi bi-book-half"></i></span>
         </button>
-        <button class="server-icon" title="Projeto Web">
-            <span class="fallback-icon"><i class="bi bi-code-slash"></i></span>
+        <button class="icone-servidor" title="Projeto Web">
+            <span class="icone-reserva"><i class="bi bi-code-slash"></i></span>
         </button>
-        <button class="server-icon add-server" id="btn-novo-servidor" title="Adicionar um servidor">
+        <button class="icone-servidor adicionar-servidor" id="botao-novo-servidor" title="Adicionar um servidor">
             <i class="bi bi-plus-lg"></i>
         </button>
     </nav>
 
-    <!-- 2. Sidebar de Canais e Perfil do Usuário -->
-    <aside class="channels-sidebar" id="channels-sidebar" aria-label="Canais do servidor">
-        <header class="server-header">
-            <h1 class="server-name">Comunidade IFC</h1>
-            <div class="server-header-actions">
-                <button class="icon-btn" title="Opções do servidor" aria-label="Opções do servidor">
+    <!-- canais laterais e perfil do user -->
+    <aside class="barra-canais" id="barra-canais" aria-label="Canais do servidor">
+        <header class="cabecalho-servidor">
+            <h1 class="nome-servidor">Comunidade IFC</h1>
+            <div class="acoes-cabecalho-servidor">
+                <button class="botao-icone" title="Opções do servidor" aria-label="Opções do servidor">
                     <i class="bi bi-chevron-down"></i>
                 </button>
-                <button class="icon-btn" title="Convidar pessoas" aria-label="Convidar pessoas">
+                <button class="botao-icone" title="Convidar pessoas" aria-label="Convidar pessoas">
                     <i class="bi bi-person-plus-fill"></i>
                 </button>
             </div>
         </header>
 
-        <div class="channels-list">
-            <!-- Categoria: Canais de Texto -->
-            <section class="channel-category">
-                <div class="category-header">
+        <div class="lista-canais">
+            <!-- canais de texto -->
+            <section class="categoria-canal">
+                <div class="cabecalho-categoria">
                     <span><i class="bi bi-chevron-down"></i> Canais de Texto</span>
-                    <button class="icon-btn-sm" id="btn-add-texto" title="Criar Canal de Texto" aria-label="Criar Canal de Texto">
+                    <button class="botao-icone-pequeno" id="botao-adicionar-texto" title="Criar Canal de Texto" aria-label="Criar Canal de Texto">
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
                 <ul id="lista-canais-texto" role="list">
-                    <li class="channel-item active" data-canal="geral">
+                    <li class="item-canal ativo" data-canal="geral">
                         <i class="bi bi-hash"></i> <span>geral</span>
                     </li>
-                    <li class="channel-item" data-canal="avisos">
+                    <li class="item-canal" data-canal="avisos">
                         <i class="bi bi-hash"></i> <span>avisos</span>
                     </li>
-                    <li class="channel-item" data-canal="dúvidas">
+                    <li class="item-canal" data-canal="dúvidas">
                         <i class="bi bi-hash"></i> <span>dúvidas</span>
                     </li>
-                    <li class="channel-item" data-canal="projetos">
+                    <li class="item-canal" data-canal="projetos">
                         <i class="bi bi-hash"></i> <span>projetos</span>
                     </li>
                 </ul>
             </section>
 
-            <!-- Categoria: Canais de Voz -->
-            <section class="channel-category">
-                <div class="category-header">
+            <!-- canais de voz -->
+            <section class="categoria-canal">
+                <div class="cabecalho-categoria">
                     <span><i class="bi bi-chevron-down"></i> Canais de Voz</span>
-                    <button class="icon-btn-sm" id="btn-add-voz" title="Criar Canal de Voz" aria-label="Criar Canal de Voz">
+                    <button class="botao-icone-pequeno" id="botao-adicionar-voz" title="Criar Canal de Voz" aria-label="Criar Canal de Voz">
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
                 <ul id="lista-canais-voz" role="list">
-                    <li class="channel-item voice-item" data-voz="Geral">
+                    <li class="item-canal item-voz" data-voz="Geral">
                         <i class="bi bi-volume-up-fill"></i> <span>Geral</span>
                     </li>
-                    <li class="channel-item voice-item" data-voz="Estudos">
+                    <li class="item-canal item-voz" data-voz="Estudos">
                         <i class="bi bi-volume-up-fill"></i> <span>Estudos</span>
                     </li>
                 </ul>
             </section>
         </div>
 
-        <!-- Painel Inferior do Usuário -->
-        <div class="user-panel">
-            <div class="user-info">
-                <div class="avatar-circle">
-                    <span class="status-dot online" title="Online"></span>
+        <!-- painel do user inferior -->
+        <div class="painel-usuario">
+            <div class="info-usuario">
+                <div class="avatar-circular">
+                    <span class="indicador-status conectado" title="Online"></span>
                 </div>
-                <div class="user-details">
-                    <strong class="username">Você</strong>
-                    <span class="user-status">online</span>
+                <div class="detalhes-usuario">
+                    <strong class="nome-usuario">Você</strong>
+                    <span class="status-usuario">online</span>
                 </div>
             </div>
-            <div class="user-controls">
-                <button class="control-btn" id="btn-mic" title="Silenciar microfone" aria-label="Microfone">
+            <div class="controles-usuario">
+                <button class="botao-controle" id="botao-microfone" title="Silenciar microfone" aria-label="Microfone">
                     <i class="bi bi-mic-fill"></i>
                 </button>
-                <button class="control-btn" id="btn-audio" title="Desativar áudio" aria-label="Fone de ouvido">
+                <button class="botao-controle" id="botao-audio" title="Desativar áudio" aria-label="Fone de ouvido">
                     <i class="bi bi-headphones"></i>
                 </button>
-                <a href="configuracoes.php" class="control-btn" title="Configurações de Usuário" aria-label="Configurações">
+                <a href="configuracoes.php" class="botao-controle" title="Configurações de Usuário" aria-label="Configurações">
                     <i class="bi bi-gear-fill"></i>
                 </a>
             </div>
         </div>
     </aside>
 
-    <!-- 3. Área Principal do Chat -->
-    <main class="chat-area">
-        <!-- Cabeçalho do Canal -->
-        <header class="chat-header">
-            <div class="chat-title-group">
-                <i class="bi bi-hash channel-hash"></i>
+    <!-- area do chat-->
+    <main class="area-conversa">
+        <!-- cabeçalho do canal -->
+        <header class="cabecalho-conversa">
+            <div class="grupo-titulo-conversa">
+                <i class="bi bi-hash simbolo-canal"></i>
                 <h2 id="titulo-canal-ativo">geral</h2>
             </div>
 
-            <div class="chat-header-tools">
-                <button class="icon-btn desktop-only" title="Lista de Membros" aria-label="Lista de Membros">
+            <div class="cabecalho-conversa">
+                <button class="botao-icone somente-desktop" title="Lista de Membros" aria-label="Lista de Membros">
                     <i class="bi bi-people-fill"></i>
                 </button>
-                <div class="search-box desktop-only">
+                <div class="caixa-busca somente-desktop">
                     <i class="bi bi-search"></i>
-                    <input type="search" id="input-busca-msg" placeholder="Buscar no canal de texto" aria-label="Buscar no canal de texto">
+                    <input type="search" id="campo-busca-mensagens" placeholder="Buscar no canal de texto" aria-label="Buscar no canal de texto">
                 </div>
             </div>
         </header>
 
-        <!-- Feed de Mensagens -->
-        <section class="messages-container" id="messages-container" aria-live="polite">
-            <div class="empty-state" id="empty-state">
+        <!-- mensagens -->
+        <section class="lista-mensagens" id="lista-mensagens" aria-live="polite">
+            <div class="estado-vazio" id="estado-vazio">
                 <i class="bi bi-chat-dots" aria-hidden="true"></i>
                 <h3>Este canal ainda está vazio</h3>
                 <p>Envie a primeira mensagem para começar a conversa.</p>
             </div>
         </section>
 
-        <!-- Input de Nova Mensagem -->
+        <!-- input de nova mensagem -->
         <footer class="chat-footer">
-            <form id="form-mensagem" class="message-form" novalidate>
-                <button type="button" class="attach-btn" title="Enviar arquivo" aria-label="Anexar arquivo">
+            <form id="form-mensagem" class="formulario-mensagem" novalidate>
+                <button type="button" class="botao-anexo" title="Enviar arquivo" aria-label="Anexar arquivo">
                     <i class="bi bi-plus-circle-fill"></i>
                 </button>
                 <input
@@ -155,13 +155,13 @@
                     aria-label="Digite sua mensagem"
                     required
                 >
-                <button type="submit" class="send-btn" title="Enviar mensagem" aria-label="Enviar mensagem">
+                <button type="submit" class="botao-enviar" title="Enviar mensagem" aria-label="Enviar mensagem">
                     <i class="bi bi-send-fill"></i>
                 </button>
             </form>
-            <span id="erro-mensagem" class="error-feedback" role="alert"></span>
-            <p class="academic-disclaimer">
-                Clone simplificado do Discord para fins educacionais (IFC Campus Concórdia). Dados fictícios.
+            <span id="erro-mensagem" class="feedback-erro" role="alert"></span>
+            <p class="aviso-academico">
+                Clone simplificado do Discord para trabalho acadêmico (IFC Campus Concórdia).
             </p>
         </footer>
     </main>
