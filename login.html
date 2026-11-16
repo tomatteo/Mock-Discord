@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Discord Mock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#5865F2] min-h-screen flex items-center justify-center p-4 font-sans antialiased">
+
+    <!-- Card Principal -->
+    <div class="bg-[#36393F] w-full max-w-[480px] rounded-md shadow-2xl p-8 sm:p-10">
+        
+        <!-- Cabeçalho -->
+        <div class="text-center mb-6">
+            <h1 class="text-white text-2xl font-bold mb-2">Bem Vindo de Volta!</h1>
+            <p class="text-[#B9BBBE] text-base">Estamos felizes em te ver novamente!</p>
+        </div>
+
+        <!-- Formulário -->
+        <form action="#" method="POST" class="space-y-5">
+            
+            <!-- Campo Email ou Telefone -->
+            <div>
+                <label for="login-identificador" class="block text-[#B9BBBE] text-xs font-bold uppercase tracking-wide mb-2">
+                    Email ou Número de Telefone <span class="text-[#F04747]">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="login-identificador" 
+                    name="identificador" 
+                    required
+                    class="w-full bg-[#202225] text-[#DCDDDE] h-11 px-3 rounded-[4px] border border-transparent focus:border-[#5865F2] focus:outline-none transition-colors"
+                >
+            </div>
+
+            <!-- Campo Senha -->
+            <div>
+                <label for="login-senha" class="block text-[#B9BBBE] text-xs font-bold uppercase tracking-wide mb-2">
+                    Senha <span class="text-[#F04747]">*</span>
+                </label>
+                <input 
+                    type="password" 
+                    id="login-senha" 
+                    name="senha" 
+                    required
+                    class="w-full bg-[#202225] text-[#DCDDDE] h-11 px-3 rounded-[4px] border border-transparent focus:border-[#5865F2] focus:outline-none transition-colors"
+                >
+            </div>
+
+            <!-- Botão Entrar -->
+            <div class="pt-3">
+                <button 
+                    type="submit" 
+                    class="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold h-11 rounded-[4px] transition-colors cursor-pointer"
+                >
+                    Entrar
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Link para Registro -->
+        <div class="mt-3 text-sm text-[#72767D]">
+            Não possui uma conta? 
+            <a href="register.html" class="text-[#00A8FC] hover:underline font-medium">Registrar</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
