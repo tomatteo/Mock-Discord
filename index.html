@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Discord Mock</title>
+    <link rel="stylesheet" href="style/auth.css">
+</head>
+<body class="pagina-auth">
+
+    <!-- card principal de login -->
+    <main class="auth-card">
+        <header class="auth-header">
+            <h1>Bem Vindo de Volta!</h1>
+            <p>Estamos felizes em te ver novamente.</p>
+        </header>
+
+        <section aria-label="Formulário de login">
+            <form id="form-login" class="auth-form" action="src/servidor.html" method="GET" novalidate>
+                
+                <div class="campo-grupo">
+                    <label for="login-identificador">
+                        Email ou Número de Telefone <span class="asterisco-obrigatorio">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="login-identificador" 
+                        name="identificador" 
+                        required
+                        autocomplete="username"
+                    >
+                    <span id="erro-identificador" class="mensagem-erro" role="alert"></span>
+                </div>
+
+                <div class="campo-grupo">
+                    <label for="login-senha">
+                        Senha <span class="asterisco-obrigatorio">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="login-senha" 
+                        name="senha" 
+                        required
+                        minlength="6"
+                        autocomplete="current-password"
+                    >
+                    <span id="erro-senha" class="mensagem-erro" role="alert"></span>
+                </div>
+
+                <button type="submit" class="btn-primario">
+                    Entrar
+                </button>
+            </form>
+        </section>
+
+        <footer class="auth-footer">
+            Não possui uma conta? 
+            <a href="register.html" class="auth-link">Registrar</a>
+        </footer>
+    </main>
+
+
+    <footer class="aviso-academico">
+        <p>Clone do Discord desenvolvido para fins educacionais. Sem vínculo com a empresa original. Todos os dados são ficticios.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

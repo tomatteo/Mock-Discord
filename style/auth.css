@@ -1,0 +1,216 @@
+/* Variáveis do Guia de Estilo (Cores e Tipografia) */
+
+:root {
+    --cor-primaria: #5865F2;
+    --cor-primaria-hover: #4752C4;
+    --cor-fundo-card: #36393F;
+    --cor-fundo-input: #202225;
+    --cor-texto-principal: #FFFFFF;
+    --cor-texto-secundario: #B9BBBE;
+    --cor-texto-input: #DCDDDE;
+    --cor-texto-suave: #72767D;
+    --cor-link: #00A8FC;
+    --cor-erro: #F04747;
+    --fonte-padrao: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Reset e Layout Base (Flexbox) */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.pagina-auth {
+    background-color: var(--cor-primaria);
+    font-family: var(--fonte-padrao);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Card Central de Autenticação */
+
+.auth-card {
+    background-color: var(--cor-fundo-card);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    padding: 2.5rem;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-header h1 {
+    color: var(--cor-texto-principal);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: var(--cor-texto-secundario);
+    font-size: 1rem;
+}
+
+/* Formulário e Campos */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+}
+
+.campo-grupo {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo-grupo label {
+    color: var(--cor-texto-secundario);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+}
+
+.asterisco-obrigatorio {
+    color: var(--cor-erro);
+}
+
+.campo-grupo input {
+    width: 100%;
+    height: 44px;
+    background-color: var(--cor-fundo-input);
+    color: var(--cor-texto-input);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campo-grupo input:focus-visible {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.35);
+}
+
+.campo-grupo input.input-invalido {
+    border-color: var(--cor-erro);
+}
+
+.mensagem-erro {
+    color: var(--cor-erro);
+    font-size: 0.78rem;
+    margin-top: 0.35rem;
+    min-height: 1rem;
+    display: none;
+}
+
+.mensagem-erro.ativo {
+    display: block;
+}
+
+
+/*   Botão, Links e Aviso Educacional */
+
+.btn-primario {
+    width: 100%;
+    height: 44px;
+    background-color: var(--cor-primaria);
+    color: var(--cor-texto-principal);
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primario:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+.btn-primario:focus-visible {
+    outline: 2px solid var(--cor-texto-principal);
+    outline-offset: 2px;
+}
+
+.btn-uppercase {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.auth-footer {
+    margin-top: 0.85rem;
+    font-size: 0.875rem;
+    color: var(--cor-texto-suave);
+}
+
+.auth-footer-interno {
+    font-size: 0.875rem;
+    color: var(--cor-texto-suave);
+}
+
+.auth-link {
+    color: var(--cor-link);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link:hover,
+.auth-link:focus-visible {
+    text-decoration: underline;
+    outline: none;
+}
+
+.aviso-academico {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.78rem;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   Responsividade (Breakpoint 1: Tablet <= 768px | Breakpoint 2: Mobile <= 480px)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .auth-card {
+        max-width: 440px;
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body.pagina-auth {
+        background-color: var(--cor-fundo-card);
+        justify-content: space-between;
+        padding: 0;
+    }
+
+    .auth-card {
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 2rem 1.25rem;
+    }
+
+    .aviso-academico {
+        color: var(--cor-texto-secundario);
+        padding: 1rem 1.25rem;
+    }
+}
