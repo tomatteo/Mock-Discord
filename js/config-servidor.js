@@ -22,6 +22,71 @@ document.addEventListener("DOMContentLoaded", () => {
     const msgSucesso = document.getElementById("msg-sucesso-perfil");
 
     const configSalva = JSON.parse(localStorage.getItem("mock_discord_server_config") || "null");
+    const parametros = new URLSearchParams(window.location.search);
+    const servidorSelecionado = parametros.get("servidor");
+    const urlServidor = servidorSelecionado
+        ? `servidor.html?${new URLSearchParams({ servidor: servidorSelecionado })}`
+        : "servidor.html";
+    const botaoExcluirServidor = document.getElementById("btn-excluir-servidor");
+    const dialogoExcluirServidor = document.getElementById("dialogo-excluir-servidor");
+    const nomeServidorExclusao = document.getElementById("nome-servidor-exclusao");
+    const erroExcluirServidor = document.getElementById("erro-excluir-servidor");
+    const servidoresSalvos = JSON.parse(localStorage.getItem("mock_discord_servidores") || "[]") || [];
+    const servidorPodeExcluir = Array.isArray(servidoresSalvos)
+        && servidoresSalvos.some((servidor) => servidor.nome === servidorSelecionado);
+
+    document.querySelectorAll("#link-voltar-servidor, #link-voltar-servidor-mobile").forEach((link) => {
+        link.href = urlServidor;
+    });
+    botaoExcluirServidor.disabled = !servidorPodeExcluir;
+    if (!servidorPodeExcluir) {
+        botaoExcluirServidor.title = "O servidor padrão não pode ser excluído.";
+    }
+
+    botaoExcluirServidor.addEventListener("click", () => {
+        if (!servidorPodeExcluir) return;
+        nomeServidorExclusao.textContent = configSalva?.nome || servidorSelecionado;
+        erroExcluirServidor.textContent = "";
+        dialogoExcluirServidor.showModal();
+    });
+
+    document.getElementById("cancelar-exclusao-servidor").addEventListener("click", () => {
+        dialogoExcluirServidor.close();
+    });
+
+    document.getElementById("confirmar-exclusao-servidor").addEventListener("click", () => {
+        const servidores = JSON.parse(localStorage.getItem("mock_discord_servidores") || "[]") || [];
+        const indiceServidor = Array.isArray(servidores)
+            ? servidores.findIndex((servidor) => servidor.nome === servidorSelecionado)
+            : -1;
+
+        if (indiceServidor < 0) {
+            erroExcluirServidor.textContent = "Este servidor não foi encontrado.";
+            return;
+        }
+
+        servidores.splice(indiceServidor, 1);
+        localStorage.setItem("mock_discord_servidores", JSON.stringify(servidores));
+
+        const canaisSalvos = JSON.parse(localStorage.getItem("mock_discord_canais_servidor") || "{}") || {};
+        delete canaisSalvos[servidorSelecionado];
+        localStorage.setItem("mock_discord_canais_servidor", JSON.stringify(canaisSalvos));
+
+        const mensagensSalvas = JSON.parse(localStorage.getItem("mock_discord_mensagens_canais") || "{}") || {};
+        const prefixoMensagens = `${servidorSelecionado}::`;
+        Object.keys(mensagensSalvas).forEach((chave) => {
+            if (chave.startsWith(prefixoMensagens)) delete mensagensSalvas[chave];
+        });
+        localStorage.setItem("mock_discord_mensagens_canais", JSON.stringify(mensagensSalvas));
+
+        if (servidorSelecionado !== "Comunidade IFC") {
+            localStorage.removeItem("mock_discord_server_config");
+        }
+
+        dialogoExcluirServidor.close();
+        window.location.href = "inicio.html";
+    });
+
     if (configSalva) {
         inputNome.value = configSalva.nome || "Comunidade IFC";
         atualizarNomes(inputNome.value);
@@ -137,8 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            window.location.href = "servidor.html";
+        if (e.key === "Escape" && !dialogoExcluirServidor.open) {
+            window.location.href = urlServidor;
         }
     });
 });

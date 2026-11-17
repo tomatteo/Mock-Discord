@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amigos - Mock Discord</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../style/inicio.css">
+    <link rel="stylesheet" href="../style/configuracoes-popup.css">
+    <link rel="stylesheet" href="../style/modal-servidor.css">
+</head>
+<body>
+
+<div class="layout-aplicativo">
+    <!-- 1. barra lateral de servidores -->
+    <nav class="barra-servidores" aria-label="Lista de servidores">
+        <a href="inicio.html" class="icone-servidor icone-inicio ativo" title="Página Inicial / Amigos">
+            <i class="bi bi-discord"></i>
+        </a>
+        <div class="divisoria-servidores"></div>
+        <a href="servidor.html?servidor=Comunidade%20IFC" class="icone-servidor" title="Comunidade IFC" data-servidor="Comunidade IFC">
+            <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
+        </a>
+        <button type="button" class="icone-servidor adicionar-servidor" id="btn-novo-servidor" title="Adicionar um servidor">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </nav>
+
+    <!-- sidebar de dms -->
+    <aside class="barra-dms" aria-label="Mensagens Diretas">
+        <header class="cabecalho-dms">
+            <input type="search" id="busca-dm" placeholder="Encontre ou comece uma conversa" aria-label="Encontre ou comece uma conversa">
+            <!-- Botão + visível apenas no Mobile conforme wireframe -->
+            <button type="button" class="btn-add-amigo-mobile" id="btn-abrir-add-mobile" title="Adicionar amigo" aria-label="Adicionar amigo">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </header>
+
+        <div class="lista-dms-container">
+            <ul class="lista-dms" id="lista-dms">
+                <li>
+                    <a href="dm.html?amigo=amigo1" class="item-dm" data-amigo="amigo1">
+                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
+                        <span class="nome-dm">amigo 1</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="dm.html?amigo=amigo2" class="item-dm" data-amigo="amigo2">
+                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
+                        <span class="nome-dm">amigo 2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="dm.html?amigo=amigo3" class="item-dm" data-amigo="amigo3">
+                        <div class="avatar-dm"><span class="ponto-status ausente"></span></div>
+                        <span class="nome-dm">amigo 3</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- painel inferior do usuario -->
+        <div class="painel-usuario">
+            <div class="info-usuario">
+                <div class="avatar-usuario">
+                    <span class="ponto-status online"></span>
+                </div>
+                <div class="detalhes-usuario">
+                    <strong data-nome-usuario>Você</strong>
+                    <span>online</span>
+                </div>
+            </div>
+            <div class="controles-usuario">
+                <button type="button" class="btn-controle" id="btn-mic" title="Silenciar microfone" aria-label="Microfone">
+                    <i class="bi bi-mic-fill"></i>
+                </button>
+                <button type="button" class="btn-controle" id="btn-audio" title="Desativar áudio" aria-label="Fone de ouvido">
+                    <i class="bi bi-headphones"></i>
+                </button>
+                <a href="configuracoes.html" class="btn-controle" title="Configurações" aria-label="Configurações">
+                    <i class="bi bi-gear-fill"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- area principal de amigos (Desktop) -->
+    <main class="area-amigos" id="area-amigos">
+        <header class="cabecalho-amigos">
+            <div class="titulo-amigos">
+                <i class="bi bi-person-raised-hand"></i>
+                <h1>Amigos</h1>
+            </div>
+            <div class="divisor-vertical"></div>
+            <nav class="abas-amigos" aria-label="Filtro de amigos">
+                <button type="button" class="aba-amigo ativa" data-filtro="disponiveis">Disponíveis</button>
+                <button type="button" class="aba-amigo" data-filtro="todos">Todos</button>
+                <button type="button" class="aba-amigo btn-roxo-amigo" data-filtro="adicionar">Adicionar amigo</button>
+            </nav>
+        </header>
+
+        <!-- conteudo das listas (disponíveis / todos) -->
+        <section class="conteudo-lista-amigos ativo" id="secao-lista-amigos">
+            <div class="barra-busca-amigos">
+                <input type="search" id="input-busca-amigos" placeholder="Buscar" aria-label="Buscar amigos">
+                <i class="bi bi-search"></i>
+            </div>
+
+            <h2 class="contador-amigos" id="contador-amigos">ONLINE — 2</h2>
+
+            <ul class="lista-amigos" id="lista-amigos">
+                <li class="item-amigo" data-status="online" data-amigo="amigo1">
+                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 1">
+                        <div class="avatar-amigo">
+                            <span class="ponto-status online"></span>
+                        </div>
+                        <div class="amigo-texto">
+                            <strong>amigo 1</strong>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                    <div class="amigo-acoes">
+                        <button type="button" class="acao-circulo" title="Iniciar chamada de voz" aria-label="Ligar para amigo 1">
+                            <i class="bi bi-telephone-fill"></i>
+                        </button>
+                        <a href="dm.html?amigo=amigo1" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 1">
+                            <i class="bi bi-chat-fill"></i>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="item-amigo" data-status="online" data-amigo="amigo2">
+                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 2">
+                        <div class="avatar-amigo">
+                            <span class="ponto-status online"></span>
+                        </div>
+                        <div class="amigo-texto">
+                            <strong>amigo 2</strong>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                    <div class="amigo-acoes">
+                        <button type="button" class="acao-circulo" title="Iniciar chamada de voz" aria-label="Ligar para amigo 2">
+                            <i class="bi bi-telephone-fill"></i>
+                        </button>
+                        <a href="dm.html?amigo=amigo2" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 2">
+                            <i class="bi bi-chat-fill"></i>
+                        </a>
+                    </div>
+                </li>
+
+                <li class="item-amigo" data-status="offline" data-amigo="amigo3" hidden>
+                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 3">
+                        <div class="avatar-amigo">
+                            <span class="ponto-status offline"></span>
+                        </div>
+                        <div class="amigo-texto">
+                            <strong>amigo 3</strong>
+                            <span>Offline</span>
+                        </div>
+                    </div>
+                    <div class="amigo-acoes">
+                        <a href="dm.html?amigo=amigo3" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 3">
+                            <i class="bi bi-chat-fill"></i>
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Seçao "Adicionar Amigo" -->
+        <section class="conteudo-adicionar-amigo" id="secao-adicionar-amigo">
+            <h2>ADICIONAR AMIGO</h2>
+            <p>Você pode adicionar amigos com o nome de usuário deles no Mock Discord.</p>
+
+            <form id="form-adicionar-amigo" class="form-add-amigo" novalidate>
+                <input type="text" id="input-novo-amigo" placeholder="Digite um nome de usuário..." required>
+                <button type="submit" class="btn-enviar-pedido">Enviar pedido de amizade</button>
+            </form>
+            <span class="feedback-amigo" id="feedback-amigo" role="status"></span>
+        </section>
+
+        <footer class="rodape-academico">
+            Clone simplificado do Discord para trabalho acadêmico (IFC Campus Concórdia). Dados fictícios.
+        </footer>
+    </main>
+</div>
+
+<script src="../js/sessao.js"></script>
+<script src="../js/inicio.js"></script>
+<script src="../js/configuracoes-popup.js"></script>
+<script src="../js/criar-servidor.js"></script>
+</body>
+</html>

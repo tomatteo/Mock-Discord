@@ -1,0 +1,248 @@
+/* Fundo escuro sobreposto à tela */
+.overlay-modal-servidor {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 9999;
+}
+
+.overlay-modal-servidor.aberto {
+    display: flex;
+}
+
+/* Caixa principal do modal */
+.modal-criar-servidor {
+    background-color: #1A1B1E;
+    color: #F2F3F5;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    border: 1px solid #2B2D31;
+    animation: surgirModal 0.16s ease-out;
+}
+
+@keyframes surgirModal {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Botão X no canto superior direito */
+.btn-fechar-modal-servidor {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: #949BA4;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s ease;
+}
+
+.btn-fechar-modal-servidor:hover {
+    color: #F2F3F5;
+}
+
+/* Cabeçalho centralizado */
+.cabecalho-modal-servidor {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.cabecalho-modal-servidor h2 {
+    font-size: 23px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #F2F3F5;
+}
+
+.cabecalho-modal-servidor p {
+    font-size: 14px;
+    color: #B5BAC1;
+    line-height: 1.4;
+}
+
+/* Área circular tracejada de upload do ícone */
+.area-upload-icone {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.circulo-upload-servidor {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 2px dashed #80848E;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #B5BAC1;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.circulo-upload-servidor:hover {
+    border-color: #F2F3F5;
+    color: #F2F3F5;
+}
+
+.circulo-upload-servidor i.bi-camera-fill {
+    font-size: 22px;
+}
+
+.circulo-upload-servidor span {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.circulo-upload-servidor img.preview-icone-modal {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Bolinha roxa/azul com + no canto do círculo */
+.badge-mais-upload {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #5865F2;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Campo Nome do servidor */
+.campo-nome-novo-servidor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.campo-nome-novo-servidor label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #F2F3F5;
+}
+
+.campo-nome-novo-servidor .asterisco-obrigatorio {
+    color: #F23F43;
+}
+
+.campo-nome-novo-servidor input {
+    background-color: #111214;
+    border: 1px solid #3F4147;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #F2F3F5;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.campo-nome-novo-servidor input:focus {
+    border-color: #5865F2;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.35);
+}
+
+.erro-modal-servidor {
+    color: #F23F43;
+    font-size: 12px;
+    min-height: 16px;
+}
+
+/* Texto das diretrizes */
+.texto-diretrizes-servidor {
+    font-size: 12px;
+    color: #949BA4;
+    line-height: 1.4;
+    margin-bottom: 24px;
+}
+
+.texto-diretrizes-servidor a {
+    color: #00A8FC;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.texto-diretrizes-servidor a:hover {
+    text-decoration: underline;
+}
+
+/* Rodapé com Voltar e Criar */
+.rodape-modal-servidor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-voltar-modal-servidor {
+    background: transparent;
+    border: none;
+    color: #F2F3F5;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 4px;
+}
+
+.btn-voltar-modal-servidor:hover {
+    text-decoration: underline;
+}
+
+.btn-confirmar-criar-servidor {
+    background-color: #5865F2;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-confirmar-criar-servidor:hover {
+    background-color: #4752C4;
+}
+
+/* Estilo para ícones de servidores customizados adicionados na barra lateral */
+.icone-servidor img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.iniciais-servidor-custom {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}

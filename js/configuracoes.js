@@ -41,8 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-   
-    const usuarioSalvo = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
+    const usuarioSalvo = JSON.parse(localStorage.getItem("mock_discord_usuario") || localStorage.getItem("usuarioLogado") || "null");
     if (usuarioSalvo) {
         const inicial = usuarioSalvo.username.charAt(0).toUpperCase();
         document.getElementById("avatar-inicial").textContent = inicial;
@@ -54,8 +53,41 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone;
     }
 
-   
-    // 3. Controles de Voz e Áudio 
+    const popupAtivo = new URLSearchParams(window.location.search).get("popup") === "1";
+    document.body.classList.toggle("pagina-config-popup", popupAtivo);
+    const botoesFechar = document.querySelectorAll(".btn-fechar-mobile-lista, .btn-fechar-desktop");
+
+    botoesFechar.forEach((botao) => {
+        botao.addEventListener("click", (evento) => {
+            if (!popupAtivo) return;
+            evento.preventDefault();
+            window.parent.postMessage("fechar-configuracoes", "*");
+        });
+    });
+
+    const btnSairConta = document.getElementById("btn-sair-conta");
+    if (btnSairConta) {
+        btnSairConta.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            localStorage.removeItem("mock_discord_usuario");
+            localStorage.removeItem("usuarioLogado");
+            if (popupAtivo) {
+                window.parent.postMessage("sair-configuracoes", "*");
+                return;
+            }
+            window.location.href = "../index.html";
+        });
+    }
+
+    if (popupAtivo) {
+        document.addEventListener("keydown", (evento) => {
+            if (evento.key === "Escape") {
+                window.parent.postMessage("fechar-configuracoes", "*");
+            }
+        });
+    }
+
+    // Controles de voz e áudio.
     const selectMic = document.getElementById("select-microfone");
     const selectFalante = document.getElementById("select-altofalante");
     const sliderMic = document.getElementById("volume-microfone");

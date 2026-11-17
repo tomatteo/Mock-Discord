@@ -25,10 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     ];
 
-    // Página de destino após o login 
-    const PAGINA_AMIGOS = "src/servidor.html";
-
-
     if (inputTelefone) {
         inputTelefone.addEventListener("input", (evento) => {
             let valor = evento.target.value.replace(/\D/g, "");
@@ -74,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const valorSenha = inputSenha.value;
 
             if (!valorId) {
-                mostrarErro(inputIdentificador, erroIdentificador, "Informe seu e-mail ou número de telefone.");
+                mostrarErro(inputIdentificador, erroIdentificador, "Informe seu e-mail, usuário ou número de telefone.");
                 valido = false;
             }
 
@@ -93,20 +89,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const usuarioEncontrado = todasAsContas.find((conta) => {
                 const emailBate = conta.email.toLowerCase() === valorId.toLowerCase();
+                const nomeBate = conta.username.toLowerCase() === valorId.toLowerCase();
                 const telefoneBate = digitosDigitados.length >= 10 && conta.telefone.replace(/\D/g, "") === digitosDigitados;
-                return (emailBate || telefoneBate) && conta.senha === valorSenha;
+                return (emailBate || nomeBate || telefoneBate) && conta.senha === valorSenha;
             });
 
             if (usuarioEncontrado) {
-                // Salva os dados do usuário logado para exibir nome/avatar na tela de Amigos
-                localStorage.setItem("usuarioLogado", JSON.stringify({
+                const usuarioLogado = {
                     username: usuarioEncontrado.username,
                     email: usuarioEncontrado.email,
                     telefone: usuarioEncontrado.telefone
-                }));
-                window.location.href = PAGINA_AMIGOS;
+                };
+                localStorage.setItem("mock_discord_usuario", JSON.stringify(usuarioLogado));
+                localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+                window.location.href = "inicio.html";
             } else {
-                mostrarErro(inputIdentificador, erroIdentificador, "E-mail/telefone ou senha inválidos.");
+                mostrarErro(inputIdentificador, erroIdentificador, "E-mail, usuário, telefone ou senha inválidos.");
                 mostrarErro(inputSenha, erroSenha, "Verifique suas credenciais ou crie uma conta.");
             }
         });
@@ -164,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 localStorage.setItem("contasCadastradas", JSON.stringify(contasSalvas));
 
-                //volta para a tela de login para entrar com a conta criada
+                // Volta para o login para entrar com a conta criada.
                 window.location.href = "index.html";
             }
         });

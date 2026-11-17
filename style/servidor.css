@@ -177,6 +177,115 @@ body {
     font-weight: 600;
 }
 
+.dialogo-canal {
+    width: min(440px, calc(100vw - 32px));
+    margin: auto;
+    padding: 24px;
+    border: 1px solid #2B2D31;
+    border-radius: 12px;
+    background-color: #1A1B1E;
+    color: #F2F3F5;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.dialogo-canal::backdrop {
+    background-color: rgba(0, 0, 0, 0.78);
+}
+
+.dialogo-canal form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialogo-canal h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+}
+
+.dialogo-canal label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dialogo-canal input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #3F4147;
+    border-radius: 6px;
+    outline: none;
+    background-color: #111214;
+    color: #F2F3F5;
+}
+
+.dialogo-canal input:focus {
+    border-color: #5865F2;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.35);
+}
+
+.erro-dialogo-canal {
+    min-height: 16px;
+    color: #F23F43;
+    font-size: 12px;
+}
+
+.acoes-dialogo-canal {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.acoes-dialogo-canal button,
+.menu-contextual-canal button {
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font: inherit;
+}
+
+#cancelar-dialogo-canal {
+    background: transparent;
+    color: #F2F3F5;
+}
+
+#confirmar-dialogo-canal {
+    background-color: #5865F2;
+    color: #FFFFFF;
+}
+
+.menu-contextual-canal {
+    position: fixed;
+    z-index: 10000;
+    min-width: 168px;
+    padding: 6px;
+    border: 1px solid #2B2D31;
+    border-radius: 6px;
+    background-color: #1E1F22;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.menu-contextual-canal button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: #F2F3F5;
+}
+
+.menu-contextual-canal button:hover {
+    background-color: #4752C4;
+}
+
+.menu-contextual-canal button[data-acao="excluir"]:hover {
+    background-color: #DA373C;
+}
+
+.menu-contextual-canal button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
 /* Painel do Usuário Inferior */
 .painel-usuario {
     height: 54px;

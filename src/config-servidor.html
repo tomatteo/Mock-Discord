@@ -12,7 +12,7 @@
 <div class="layout-configuracoes" id="layout-configuracoes">
     <!-- cabeçalho mobile (aparece abaixo de 768px) -->
     <header class="cabecalho-mobile">
-        <a href="servidor.html" class="fechar-mobile" aria-label="Voltar para o servidor">
+        <a href="servidor.html" class="fechar-mobile" id="link-voltar-servidor-mobile" aria-label="Voltar para o servidor">
             <i class="bi bi-x-lg"></i>
         </a>
         <h1>Config. do servidor</h1>
@@ -49,7 +49,7 @@
             <button type="button" class="btn-voltar-mobile" id="btn-voltar-mobile">
                 <i class="bi bi-arrow-left"></i> Voltar
             </button>
-            <a href="servidor.html" class="botao-esc" title="Voltar para o servidor">
+            <a href="servidor.html" class="botao-esc" id="link-voltar-servidor" title="Voltar para o servidor">
                 <span class="circulo-esc"><i class="bi bi-x-lg"></i></span>
                 <span class="texto-esc">ESC</span>
             </a>
@@ -188,6 +188,17 @@
         </footer>
     </main>
 </div>
+
+<dialog id="dialogo-excluir-servidor" class="dialogo-excluir-servidor" aria-labelledby="titulo-excluir-servidor">
+    <h2 id="titulo-excluir-servidor">Excluir servidor?</h2>
+    <p>Esta ação removerá o servidor, seus canais e o histórico de mensagens. Não será possível desfazê-la.</p>
+    <strong id="nome-servidor-exclusao"></strong>
+    <span id="erro-excluir-servidor" class="erro-excluir-servidor" role="alert"></span>
+    <div class="acoes-excluir-servidor">
+        <button type="button" id="cancelar-exclusao-servidor">Cancelar</button>
+        <button type="button" id="confirmar-exclusao-servidor">Excluir servidor</button>
+    </div>
+</dialog>
 
 <script src="../js/config-servidor.js"></script>
 </body>
