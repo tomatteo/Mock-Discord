@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Usuário - Discord Mock</title>
+    <link rel="stylesheet" href="../style/configuracoes.css">
+</head>
+<body class="pagina-config">
+
+    <!-- layout principal -->
+    <div id="layout-config" class="config-layout">
+        
+        <!-- Barra Lateral de Navegação-->
+        <aside class="config-sidebar" aria-label="Menu de configurações">
+            <header class="usuario-resumo">
+                <div class="avatar-usuario" id="avatar-inicial" aria-hidden="true">F</div>
+                <span class="nome-usuario" id="nome-usuario-sidebar">Nome Usuário</span>
+                <a href="servidor.html" class="btn-fechar-mobile-lista" aria-label="Fechar configurações">✕</a>
+            </header>
+
+            <nav class="config-nav">
+                <button type="button" class="aba-nav" data-aba="conta">
+                    <span class="icone-nav" aria-hidden="true"></span>
+                    <span>Conta</span>
+                </button>
+                <button type="button" class="aba-nav ativo" data-aba="voz">
+                    <span class="icone-nav" aria-hidden="true"></span>
+                    <span>Voz e Áudio</span>
+                </button>
+                <button type="button" class="aba-nav" data-aba="sobre">
+                    <span class="icone-nav" aria-hidden="true"></span>
+                    <span>Sobre Nós</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-acoes-extra">
+                <a href="../index.html" id="btn-sair-conta" class="btn-sair">Sair da Conta</a>
+            </div>
+        </aside>
+
+        
+        <main class="config-conteudo">
+            
+           
+            <header class="cabecalho-mobile">
+                <button type="button" id="btn-voltar-mobile" class="btn-voltar" aria-label="Voltar para opções">
+                    ←
+                </button>
+                <h2 id="titulo-mobile-subtela">Voz</h2>
+            </header>
+
+            <a href="servidor.html" class="btn-fechar-desktop" title="Fechar Configurações" aria-label="Fechar configurações">
+                ✕
+            </a>
+
+            <!-- CONTA -->
+            <section id="painel-conta" class="painel-aba" hidden>
+                <h1>Minha Conta</h1>
+
+                <article class="card-perfil">
+                    <div class="perfil-topo">
+                        <div class="avatar-grande" id="avatar-perfil">F</div>
+                        <div>
+                            <h2 id="perfil-username">Nome Usuário</h2>
+                            <p class="texto-suave">Status: Online</p>
+                        </div>
+                    </div>
+
+                    <div class="lista-dados-conta">
+                        <div class="dado-item">
+                            <span class="dado-label">Nome de Usuário</span>
+                            <span class="dado-valor" id="valor-username">Filipe</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">E-mail</span>
+                            <span class="dado-valor" id="valor-email">filipe@discord.mock</span>
+                        </div>
+                        <div class="dado-item">
+                            <span class="dado-label">Telefone</span>
+                            <span class="dado-valor" id="valor-telefone">(49) 99999-0001</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <!-- VOZ E ÁUDIO -->
+            <section id="painel-voz" class="painel-aba ativo">
+                <h1>Voz</h1>
+
+                <div class="grid-voz">
+                    <!-- Coluna Microfone -->
+                    <div class="campo-voz">
+                        <label for="select-microfone">Microfone</label>
+                        <div class="select-wrapper">
+                            <span class="select-icone" aria-hidden="true">🎙️</span>
+                            <select id="select-microfone" name="microfone">
+                                <option value="padrao">Padrão do Windows</option>
+                                <option value="headset">Fone de ouvido (Headset)</option>
+                                <option value="externo">Microfone Condensador USB</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Coluna Alto-falante -->
+                    <div class="campo-voz">
+                        <label for="select-altofalante">Alto-falante</label>
+                        <div class="select-wrapper">
+                            <span class="select-icone" aria-hidden="true">🎧</span>
+                            <select id="select-altofalante" name="altofalante">
+                                <option value="padrao">Padrão do Windows</option>
+                                <option value="headset">Headset Gamer Stereo</option>
+                                <option value="monitor">Saída de Áudio Monitor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Slider Volume do Microfone -->
+                    <div class="campo-voz">
+                        <div class="label-com-valor">
+                            <label for="volume-microfone">Volume do Microfone</label>
+                            <span id="texto-vol-mic" class="valor-slider">80%</span>
+                        </div>
+                        <input type="range" id="volume-microfone" min="0" max="100" value="80" class="slider-discord">
+                    </div>
+
+                    <!-- Slider Volume do Alto-falante -->
+                    <div class="campo-voz">
+                        <div class="label-com-valor">
+                            <label for="volume-altofalante">Volume do Alto-falante</label>
+                            <span id="texto-vol-falante" class="valor-slider">85%</span>
+                        </div>
+                        <input type="range" id="volume-altofalante" min="0" max="100" value="85" class="slider-discord">
+                    </div>
+                </div>
+
+                <!-- Teste de Microfone + Medidor de Barras -->
+                <div class="teste-mic-container">
+                    <button type="button" id="btn-teste-mic" class="btn-primario">
+                        Teste de microfone
+                    </button>
+                    <div id="medidor-barras" class="medidor-barras" role="progressbar" aria-label="Nível de captação do microfone" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <!-- Barras geradas dinamicamente via JS -->
+                    </div>
+                </div>
+                <p id="status-teste-mic" class="texto-status-mic"></p>
+            </section>
+
+            <!-- SOBRE NÓS -->
+            <section id="painel-sobre" class="painel-aba" hidden>
+                <h1>Sobre Nós</h1>
+
+                <article class="sobre-texto">
+                    <p>
+                        Este projeto é um clone funcional da interface do <strong>Discord</strong> desenvolvido exclusivamente para fins educacionais na disciplina de <strong>Desenvolvimento Web I</strong>.
+                    </p>
+                    <p>
+                        Não possui qualquer vínculo com o Discord. Todos os usuários, servidores, canais e mensagens apresentados são inteiramente ficticios.
+                    </p>
+                </article>
+
+                <div class="tabela-wrapper">
+                    <h2>Equipe e Módulos do Projeto</h2>
+                    <table class="tabela-equipe">
+                        <thead>
+                            <tr>
+                                <th>Integrante</th>
+                                <th>Módulo Responsável</th>
+                                <th>Tecnologias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Filipe Nunes</td>
+                                <td>Login, Registro e Configurações de Voz</td>
+                                <td>HTML5, CSS3, JS </td>
+                            </tr>
+                            <tr>
+                                <td>Matteo Thomé</td>
+                                <td>Servidores, Canais de Texto e Mensagens</td>
+                                <td>HTML5, CSS3, JS</td>
+                            </tr>
+                            <tr>
+                                <td>João Pedro Veloso</td>
+                                <td>Lista de Amigos e Mensagens Diretas (DM)</td>
+                                <td>HTML5, CSS3, JS</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="rodape-config">
+                <p>Clone educacional do Discord, sem vinculo comercial.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="../js/configuracoes.js"></script>
+</body>
+</html>
