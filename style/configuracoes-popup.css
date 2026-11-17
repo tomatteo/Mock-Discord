@@ -5,14 +5,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    background-color: rgba(0, 0, 0, 0.72);
+    padding: 16px;
+    background-color: rgba(0, 0, 0, 0.62);
 }
 
 .config-popup {
     position: relative;
-    width: min(1100px, 96vw);
-    height: min(850px, 92vh);
+    width: min(820px, calc(100vw - 32px));
+    height: min(640px, calc(100vh - 32px));
     overflow: hidden;
     border-radius: 8px;
     background-color: #313338;
@@ -29,22 +29,22 @@
 
 .config-popup-fechar {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 28px;
+    right: 24px;
     z-index: 1;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border: 0;
-    border-radius: 50%;
-    background-color: #1E1F22;
+    border-radius: 0;
+    background: transparent;
     color: #F2F3F5;
-    font-size: 24px;
+    font-size: 28px;
     line-height: 1;
     cursor: pointer;
 }
 
 .config-popup-fechar:hover {
-    background-color: #35373C;
+    color: #FFFFFF;
 }
 
 body.config-popup-aberto {
@@ -61,5 +61,10 @@ body.config-popup-aberto {
         height: 100vh;
         height: 100dvh;
         border-radius: 0;
+    }
+
+    .config-popup-fechar {
+        top: 12px;
+        right: 16px;
     }
 }

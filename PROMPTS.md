@@ -27,3 +27,22 @@
 - **Arquivos envolvidos:** `js/inicio.js`, `js/dm.js`, `style/dm.css`
 - **Prompt utilizado:** *"Como implementar uma busca em tempo real para filtrar a lista de amigos, as conversas na barra lateral e o histórico de mensagens dentro do chat conforme o usuário digita, além de garantir que o envio de mensagens role automaticamente para o final sem quebrar o HTML caso alguém digite tags?"*
 - **Como a resposta foi aproveitada e ajustada:** Adicionamos ouvintes do evento `input` nos campos de busca de `inicio.js` e `dm.js` para filtrar os elementos do DOM instantaneamente usando `.toLowerCase().includes()`. Para a exibição de novas mensagens, substituímos o uso de `innerHTML` pela criação programática de elementos (`document.createElement`) com `.textContent`, evitando falhas de injeção de código (XSS), e combinamos `margin-top: auto` no CSS com `scrollTop = scrollHeight` no JavaScript para manter as mensagens sempre ancoradas na base do chat.
+
+
+### Prompt — Validação de Formulários no Cliente sem `alert()` e Máscara de Telefone
+- **Ferramenta utilizada:** Google Gemini
+- **Arquivos envolvidos:** `js/auth.js`, `index.html`, `register.html`
+- **Prompt utilizado:** *"Como validar campos de e-mail, senha e telefone em JavaScript puro exibindo as mensagens de erro diretamente abaixo de cada input no HTML, além de formatar o telefone automaticamente enquanto o usuário digita?"*
+- **Como a resposta foi aproveitada e ajustada:** Aproveitamos a lógica de manipulação do DOM com `addEventListener` e a expressão regular de formatação `(XX) XXXXX-XXXX` para exibir os avisos de validação diretamente nos elementos `<span>` abaixo de cada campo, sem utilizar `alert()`. Em seguida, adaptamos o script por conta própria para integrar a verificação de contas fictícias pré-definidas e o armazenamento dos novos cadastros no `localStorage`.
+
+### Prompt — Alternância entre Menu Lateral e Subtela no Modo Mobile
+- **Ferramenta utilizada:** Google Gemini
+- **Arquivos envolvidos:** `style/configuracoes.css`, `js/configuracoes.js`
+- **Prompt utilizado:** *"Como fazer para que, em telas menores que 768px, a tela de configurações mostre primeiro a lista de opções e só exiba o conteúdo da aba quando o usuário clicar nela, com um botão de voltar no topo?"*
+- **Como a resposta foi aproveitada e ajustada:** Utilizamos a ideia de alternar a classe `.subtela-aberta` no container principal via verificação `window.innerWidth <= 768` e associar um evento de clique ao botão de voltar no cabeçalho mobile. Todo o layout das abas (Conta, Voz e Áudio, Sobre Nós), os sliders de volume e a tabela da equipe foram estruturados e ajustados pelo grupo no HTML e CSS.
+
+### Prompt — Simulação e Captação de Nível de Áudio para Teste de Microfone
+- **Ferramenta utilizada:** Google Gemini
+- **Arquivos envolvidos:** `js/configuracoes.js`, `src/configuracoes.html`
+- **Prompt utilizado:** *"Como criar um medidor visual em barras para testar o microfone no navegador usando JavaScript, com uma simulação automática caso o usuário não permita acesso ao áudio?"*
+- **Como a resposta foi aproveitada e ajustada:** Adaptamos o trecho sugerido com `AudioContext` e `setInterval` para criar e preencher dinamicamente as 32 barras de nível conforme o valor do slider de volume do microfone definido pelo usuário, integrando o funcionamento ao restante da aba de Voz e Áudio e salvando as preferências no `localStorage`.

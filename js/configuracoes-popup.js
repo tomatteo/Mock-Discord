@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fundoPopup.remove();
         document.body.classList.remove("config-popup-aberto");
+        document.querySelector(".layout-aplicativo")?.removeAttribute("inert");
+        document.querySelector(".layout-aplicativo")?.removeAttribute("aria-hidden");
         fundoPopup = null;
         quadroConfiguracoes = null;
         elementoFocado?.focus();
@@ -46,6 +48,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.body.appendChild(fundoPopup);
         document.body.classList.add("config-popup-aberto");
+        const layoutAplicativo = document.querySelector(".layout-aplicativo");
+        if (layoutAplicativo) {
+            layoutAplicativo.setAttribute("inert", "");
+            layoutAplicativo.setAttribute("aria-hidden", "true");
+        }
         botaoFechar.focus();
     }
 

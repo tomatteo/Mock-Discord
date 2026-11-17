@@ -1,4 +1,19 @@
+/**
+ * Lógica da tela de Configurações (Conta, Voz e Áudio, Sobre Nós)
+ * Inclui navegação mobile em subtela, persistência em localStorage, upload de avatar e teste de microfone.
+ */
 document.addEventListener("DOMContentLoaded", () => {
+    const emPopup = new URLSearchParams(window.location.search).get("popup") === "1";
+    if (emPopup) {
+        document.body.classList.add("popup-config");
+        document.querySelectorAll(".btn-fechar-desktop, .btn-fechar-mobile-lista").forEach((botao) => {
+            botao.addEventListener("click", (evento) => {
+                evento.preventDefault();
+                window.parent.postMessage("fechar-configuracoes", "*");
+            });
+        });
+    }
+
     const layout = document.getElementById("layout-config");
     const abasNav = document.querySelectorAll(".aba-nav");
     const paineisAba = document.querySelectorAll(".painel-aba");
@@ -11,7 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
         sobre: "Sobre Nós"
     };
 
- 
+    // ======================================================================
+    // 1. Navegação entre abas + Modo Subtela Mobile
+    // ======================================================================
     abasNav.forEach((aba) => {
         aba.addEventListener("click", () => {
             const alvo = aba.dataset.aba;
@@ -29,65 +46,44 @@ document.addEventListener("DOMContentLoaded", () => {
                 tituloMobileSubtela.textContent = titulosMobile[alvo];
             }
 
+            // Entra no modo subtela apenas se a largura da tela for <= 768px
             if (window.innerWidth <= 768) {
                 layout.classList.add("subtela-aberta");
             }
         });
     });
 
+    // Botão "Voltar" no cabeçalho mobile para retornar à lista de opções
     if (btnVoltarMobile) {
         btnVoltarMobile.addEventListener("click", () => {
             layout.classList.remove("subtela-aberta");
         });
     }
 
-    const usuarioSalvo = JSON.parse(localStorage.getItem("mock_discord_usuario") || localStorage.getItem("usuarioLogado") || "null");
+    // ======================================================================
+    // 2. Carrega dados do usuário logado
+    // ======================================================================
+    const usuarioSalvo = JSON.parse(
+        localStorage.getItem("mock_discord_usuario") ||
+        localStorage.getItem("usuarioLogado") ||
+        "null"
+    );
+
     if (usuarioSalvo) {
-        const inicial = usuarioSalvo.username.charAt(0).toUpperCase();
+        const nome = usuarioSalvo.username || usuarioSalvo.nome || "Filipe";
+        const inicial = nome.charAt(0).toUpperCase();
         document.getElementById("avatar-inicial").textContent = inicial;
         document.getElementById("avatar-perfil").textContent = inicial;
-        document.getElementById("nome-usuario-sidebar").textContent = usuarioSalvo.username;
-        document.getElementById("perfil-username").textContent = usuarioSalvo.username;
-        document.getElementById("valor-username").textContent = usuarioSalvo.username;
-        document.getElementById("valor-email").textContent = usuarioSalvo.email;
-        document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone;
+        document.getElementById("nome-usuario-sidebar").textContent = nome;
+        document.getElementById("perfil-username").textContent = nome;
+        document.getElementById("valor-username").textContent = nome;
+        document.getElementById("valor-email").textContent = usuarioSalvo.email || "filipe@discord.mock";
+        document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone || "(49) 99999-0001";
     }
 
-    const popupAtivo = new URLSearchParams(window.location.search).get("popup") === "1";
-    document.body.classList.toggle("pagina-config-popup", popupAtivo);
-    const botoesFechar = document.querySelectorAll(".btn-fechar-mobile-lista, .btn-fechar-desktop");
-
-    botoesFechar.forEach((botao) => {
-        botao.addEventListener("click", (evento) => {
-            if (!popupAtivo) return;
-            evento.preventDefault();
-            window.parent.postMessage("fechar-configuracoes", "*");
-        });
-    });
-
-    const btnSairConta = document.getElementById("btn-sair-conta");
-    if (btnSairConta) {
-        btnSairConta.addEventListener("click", (evento) => {
-            evento.preventDefault();
-            localStorage.removeItem("mock_discord_usuario");
-            localStorage.removeItem("usuarioLogado");
-            if (popupAtivo) {
-                window.parent.postMessage("sair-configuracoes", "*");
-                return;
-            }
-            window.location.href = "../index.html";
-        });
-    }
-
-    if (popupAtivo) {
-        document.addEventListener("keydown", (evento) => {
-            if (evento.key === "Escape") {
-                window.parent.postMessage("fechar-configuracoes", "*");
-            }
-        });
-    }
-
-    // Controles de voz e áudio.
+    // ======================================================================
+    // 3. Controles de Voz e Áudio (Dispositivos + Sliders salvos no localStorage)
+    // ======================================================================
     const selectMic = document.getElementById("select-microfone");
     const selectFalante = document.getElementById("select-altofalante");
     const sliderMic = document.getElementById("volume-microfone");
@@ -120,12 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
     sliderMic.addEventListener("input", salvarPreferenciasAudio);
     sliderFalante.addEventListener("input", salvarPreferenciasAudio);
 
+    // ======================================================================
+    // 4. Medidor e Botão "Teste de microfone"
+    // ======================================================================
     const medidorBarras = document.getElementById("medidor-barras");
     const btnTesteMic = document.getElementById("btn-teste-mic");
     const statusTesteMic = document.getElementById("status-teste-mic");
     const TOTAL_BARRAS = 32;
 
-    // Cria as 32 barrinhas visuais do medidor
     for (let i = 0; i < TOTAL_BARRAS; i++) {
         const barra = document.createElement("span");
         barra.className = "barra-nivel";
@@ -168,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btnTesteMic.textContent = "Parar teste";
         btnTesteMic.classList.add("testando");
 
-     
         try {
             streamAtual = await navigator.mediaDevices.getUserMedia({ audio: true });
             const audioCtx = new AudioContext();
@@ -196,4 +193,73 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 120);
         }
     });
+
+    // ======================================================================
+    // 5. Upload e Persistência de Foto de Perfil no localStorage
+    // ======================================================================
+    const inputFoto = document.getElementById("input-foto-perfil");
+    const btnRemoverFoto = document.getElementById("btn-remover-foto");
+    const imgAvatarPerfil = document.getElementById("img-avatar-perfil");
+    const imgAvatarSidebar = document.getElementById("img-avatar-sidebar");
+    const divAvatarPerfil = document.getElementById("avatar-perfil");
+    const divAvatarSidebar = document.getElementById("avatar-inicial");
+
+    function aplicarFotoPerfil(dataUrl) {
+        const temFoto = Boolean(dataUrl);
+        if (imgAvatarPerfil && divAvatarPerfil) {
+            imgAvatarPerfil.src = dataUrl || "";
+            imgAvatarPerfil.hidden = !temFoto;
+            divAvatarPerfil.hidden = temFoto;
+            imgAvatarPerfil.style.display = temFoto ? "block" : "none";
+            divAvatarPerfil.style.display = temFoto ? "none" : "flex";
+        }
+        if (imgAvatarSidebar && divAvatarSidebar) {
+            imgAvatarSidebar.src = dataUrl || "";
+            imgAvatarSidebar.hidden = !temFoto;
+            divAvatarSidebar.hidden = temFoto;
+            imgAvatarSidebar.style.display = temFoto ? "block" : "none";
+            divAvatarSidebar.style.display = temFoto ? "none" : "flex";
+        }
+        if (btnRemoverFoto) {
+            btnRemoverFoto.hidden = !temFoto;
+        }
+    }
+
+    const fotoSalva = localStorage.getItem("mock_discord_avatar");
+    if (fotoSalva) {
+        aplicarFotoPerfil(fotoSalva);
+    }
+
+    if (inputFoto) {
+        inputFoto.addEventListener("change", (evento) => {
+            const arquivo = evento.target.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = (e) => {
+                const imgTemp = new Image();
+                imgTemp.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(imgTemp, 0, 0, 128, 128);
+
+                    const fotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
+                    localStorage.setItem("mock_discord_avatar", fotoBase64);
+                    aplicarFotoPerfil(fotoBase64);
+                };
+                imgTemp.src = e.target.result;
+            };
+            leitor.readAsDataURL(arquivo);
+        });
+    }
+
+    if (btnRemoverFoto) {
+        btnRemoverFoto.addEventListener("click", () => {
+            localStorage.removeItem("mock_discord_avatar");
+            if (inputFoto) inputFoto.value = "";
+            aplicarFotoPerfil(null);
+        });
+    }
 });
