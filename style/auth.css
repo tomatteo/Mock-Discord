@@ -185,32 +185,58 @@ body.pagina-auth {
     line-height: 1.4;
 }
 
-/* ==========================================================================
-   Responsividade (Breakpoint 1: Tablet <= 768px | Breakpoint 2: Mobile <= 480px)
-   ========================================================================== */
+/* Breakpoint mobile, alinhado às demais telas do projeto. */
 @media (max-width: 768px) {
+    body.pagina-auth {
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+    }
+
     .auth-card {
-        max-width: 440px;
+        max-width: 420px;
         padding: 2rem;
+    }
+
+    .aviso-academico {
+        max-width: 420px;
+    }
+
+    #form-register .campo-grupo:nth-of-type(3) {
+        order: 4;
+    }
+
+    #form-register .campo-grupo:nth-of-type(4) {
+        order: 3;
+    }
+
+    #form-register .auth-footer-interno {
+        order: 5;
+    }
+
+    #form-register .btn-primario {
+        order: 6;
     }
 }
 
 @media (max-width: 480px) {
     body.pagina-auth {
-        background-color: var(--cor-fundo-card);
-        justify-content: space-between;
-        padding: 0;
+        padding: 1rem 6vw;
     }
 
     .auth-card {
-        max-width: 100%;
-        box-shadow: none;
-        border-radius: 0;
-        padding: 2rem 1.25rem;
+        padding: 1.5rem 1.25rem;
     }
 
-    .aviso-academico {
-        color: var(--cor-texto-secundario);
-        padding: 1rem 1.25rem;
+    .auth-form {
+        gap: 0.9rem;
+    }
+
+    .campo-grupo input {
+        height: 40px;
+    }
+
+    .auth-header h1 {
+        font-size: 1.25rem;
     }
 }
