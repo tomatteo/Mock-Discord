@@ -441,6 +441,26 @@ body {
     font-size: 14px;
 }
 
+.mensagem-cargos {
+    min-height: 20px;
+    margin: 0 0 12px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.seletor-cargo-membro {
+    padding: 7px 10px;
+    border: 1px solid var(--borda-sutil);
+    border-radius: 5px;
+    background: var(--fundo-input);
+    color: var(--texto-claro);
+}
+
+.seletor-cargo-membro:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 .lista-simples {
     list-style: none;
     display: flex;
@@ -467,7 +487,13 @@ body {
 .caixa-convite code { flex: 1; }
 .mensagem-erro { color: var(--cor-perigo); font-size: 12px; }
 .mensagem-sucesso { color: var(--cor-online); font-size: 13px; font-weight: 600; }
-.rodape-academico { margin-top: 48px; font-size: 11px; color: var(--texto-muted); }
+.rodape-academico {
+    width: 100%;
+    margin-top: 48px;
+    font-size: 11px;
+    color: var(--texto-muted);
+    text-align: center;
+}
 
 /* Elementos exclusivos do Mobile ocultos no Desktop */
 .cabecalho-mobile,

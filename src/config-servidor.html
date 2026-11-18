@@ -127,44 +127,25 @@
         <!-- Cargos -->
         <section class="painel-aba" id="aba-cargos">
             <h1>Cargos</h1>
-            <p class="subtitulo">Gerencie permissões e hierarquia dos membros.</p>
+            <p class="subtitulo">Administradores e moderadores gerenciam o servidor. Membros podem conversar e entrar em chamadas.</p>
+            <p id="aviso-gerenciar-cargos" class="mensagem-cargos" role="status"></p>
             <table class="tabela-dados">
                 <thead>
                     <tr>
+                        <th>Membro</th>
                         <th>Cargo</th>
-                        <th>Membros</th>
-                        <th>Permissão Principal</th>
+                        <th>Permissões</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Administrador</strong></td>
-                        <td>1</td>
-                        <td>Gerenciar servidor, canais e banimentos</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Moderador</strong></td>
-                        <td>2</td>
-                        <td>Gerenciar mensagens e convites</td>
-                    </tr>
-                    <tr>
-                        <td><strong>@everyone</strong></td>
-                        <td>20</td>
-                        <td>Enviar mensagens e entrar em canais de voz</td>
-                    </tr>
-                </tbody>
+                <tbody id="lista-cargos-membros"></tbody>
             </table>
         </section>
 
         <!-- Membros -->
         <section class="painel-aba" id="aba-membros">
             <h1>Membros</h1>
-            <p class="subtitulo">Participantes do servidor (23 membros).</p>
-            <ul class="lista-simples">
-                <li><strong>Matteo Thomé</strong> — Administrador</li>
-                <li><strong>Filipe Nunes</strong> — Moderador</li>
-                <li><strong>João Veloso</strong> — Moderador</li>
-            </ul>
+            <p class="subtitulo" id="resumo-membros-servidor">Participantes do servidor.</p>
+            <ul class="lista-simples" id="lista-membros-servidor"></ul>
         </section>
 
         <!-- Convites -->
@@ -200,6 +181,7 @@
     </div>
 </dialog>
 
+<script src="../js/permissoes-servidor.js"></script>
 <script src="../js/config-servidor.js"></script>
 </body>
 </html>

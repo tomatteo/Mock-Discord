@@ -46,3 +46,15 @@
 - **Arquivos envolvidos:** `js/configuracoes.js`, `src/configuracoes.html`
 - **Prompt utilizado:** *"Como criar um medidor visual em barras para testar o microfone no navegador usando JavaScript, com uma simulação automática caso o usuário não permita acesso ao áudio?"*
 - **Como a resposta foi aproveitada e ajustada:** Adaptamos o trecho sugerido com `AudioContext` e `setInterval` para criar e preencher dinamicamente as 32 barras de nível conforme o valor do slider de volume do microfone definido pelo usuário, integrando o funcionamento ao restante da aba de Voz e Áudio e salvando as preferências no `localStorage`.
+
+### Prompt — Indicador Visual de Servidor Ativo na Barra Lateral
+- **Ferramenta utilizada:** Google Gemini
+- **Arquivos envolvidos:** `style/style.css`, `style/inicio.css`, `style/dm.css`, `style/modal-servidor.css`, `js/canais.js`, `js/criar-servidor.js`
+- **Prompt utilizado:** *"Como adicionar aquela barrinha branca vertical na lateral esquerda do ícone do servidor (igual ao Discord) para indicar visualmente em qual servidor ou tela inicial o usuário está no momento?"*
+- **Como a resposta foi aproveitada e ajustada:** Utilizamos o pseudo-elemento CSS `::before` posicionado de forma absoluta na borda esquerda dos itens da `.barra-servidores`, aplicando cor branca (`#FFFFFF`), bordas direitas arredondadas (`border-radius: 0 4px 4px 0`) e transição suave de altura (`20px` no `:hover` e `40px` quando possui a classe `.ativo`). No JavaScript, ajustamos a leitura dos parâmetros da URL (`URLSearchParams`) para aplicar automaticamente a classe `.ativo` no ícone do servidor selecionado ao abrir `servidor.html`.
+
+### Prompt — Sobreposição do Painel do Usuário sobre a Barra de Servidores
+- **Ferramenta utilizada:** GitHub Copilot (VS Code)
+- **Arquivos envolvidos:** servidor.css, inicio.css e dm.css
+- **Prompt utilizado:** “Faça o painel inferior do usuário (.painel-usuario) se estender também por baixo da barra lateral de servidores. Mantenha a foto de perfil no canto esquerdo e os controles à direita. Aumente um pouco a altura do painel e o tamanho dos elementos, aplicando o mesmo visual nas páginas do servidor, início e mensagens diretas.”
+Como a resposta foi aproveitada e ajustada: O painel foi ampliado usando a largura da barra de servidores como variável, com width: calc(100% + ...) e margem negativa à esquerda. Assim, ele cobre as duas colunas laterais sem usar posicionamento fixo. O avatar foi alinhado à esquerda; o painel ficou com 64 px de altura, o avatar com 38 px e os botões com 34 px. As alterações foram aplicadas às três páginas.

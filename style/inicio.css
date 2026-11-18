@@ -33,8 +33,9 @@ body {
 
 /* grid principal desktop (> 7 */
 .layout-aplicativo {
+    --largura-rail-servidores: 72px;
     display: grid;
-    grid-template-columns: 72px 240px 1fr;
+    grid-template-columns: var(--largura-rail-servidores) 240px minmax(0, 1fr);
     height: 100vh;
 }
 
@@ -49,6 +50,7 @@ body {
 }
 
 .icone-servidor {
+    position: relative;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -62,6 +64,27 @@ body {
     cursor: pointer;
     text-decoration: none;
     transition: border-radius 0.2s ease, background-color 0.2s ease;
+}
+
+.icone-servidor::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    width: 4px;
+    height: 8px;
+    border-radius: 0 4px 4px 0;
+    background-color: var(--texto-claro);
+    transform: translateY(-50%);
+    transition: height 0.15s ease;
+}
+
+.icone-servidor:hover::before {
+    height: 20px;
+}
+
+.icone-servidor.ativo::before {
+    height: 40px;
 }
 
 .icone-servidor:hover,
@@ -183,7 +206,9 @@ body {
 
 /* painel inferior do usuario */
 .painel-usuario {
-    height: 54px;
+    height: 64px;
+    width: calc(100% + var(--largura-rail-servidores));
+    margin-left: calc(0px - var(--largura-rail-servidores));
     background-color: var(--fundo-usuario);
     padding: 0 8px;
     display: flex;
@@ -198,8 +223,8 @@ body {
 }
 
 .avatar-usuario {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
 }
 
 .detalhes-usuario {
@@ -208,11 +233,11 @@ body {
 }
 
 .detalhes-usuario strong {
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .detalhes-usuario span {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--texto-secundario);
 }
 
@@ -222,8 +247,8 @@ body {
 }
 
 .btn-controle {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     background: transparent;
     border: none;
     color: var(--texto-secundario);
@@ -231,7 +256,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
     text-decoration: none;
 }
@@ -251,6 +276,205 @@ body {
     flex-direction: column;
     height: 100vh;
     background-color: var(--fundo-principal);
+    min-width: 0;
+}
+
+.corpo-amigos {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.coluna-principal-amigos {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.barra-ativo-agora {
+    width: 350px;
+    flex-shrink: 0;
+    padding: 20px 16px;
+    overflow-y: auto;
+    border-left: 1px solid var(--fundo-ativo);
+    background-color: var(--fundo-principal);
+}
+
+.barra-ativo-agora h2 {
+    margin-bottom: 16px;
+    color: var(--texto-claro);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.lista-ativo-agora {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+}
+
+.card-ativo-agora {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 8px;
+    background-color: var(--fundo-sidebar);
+    border: 1px solid var(--fundo-ativo);
+    transition: background-color 0.15s ease;
+}
+
+.card-ativo-agora:hover {
+    background-color: #26282C;
+}
+
+.cabecalho-card-ativo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-ativo-agora {
+    position: relative;
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #D9D9D9;
+    color: #232428;
+    font-weight: 700;
+}
+
+.info-amigo-ativo {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.info-amigo-ativo strong {
+    overflow: hidden;
+    color: var(--texto-claro);
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.info-amigo-ativo span {
+    color: var(--texto-secundario);
+    font-size: 12px;
+}
+
+.status-amigo-chamada {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-amigo-chamada .badge-participantes-voz {
+    padding: 2px 5px;
+    border-radius: 8px;
+    background-color: var(--fundo-ativo);
+    color: var(--texto-secundario);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.detalhe-chamada-ativo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background-color: var(--fundo-usuario);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.detalhe-chamada-ativo:hover {
+    background-color: var(--fundo-hover);
+}
+
+.chamada-canal-info {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.icone-voz-ativo {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: rgba(35, 165, 89, 0.16);
+    color: var(--cor-online);
+    font-size: 16px;
+}
+
+.textos-chamada-ativo {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.textos-chamada-ativo strong,
+.textos-chamada-ativo span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.textos-chamada-ativo strong {
+    color: var(--texto-claro);
+    font-size: 13px;
+}
+
+.textos-chamada-ativo span {
+    color: var(--texto-muted);
+    font-size: 12px;
+}
+
+.badge-entrar-voz {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: rgba(35, 165, 89, 0.14);
+    color: var(--cor-online);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.vazio-ativo-agora {
+    padding: 20px 16px;
+    border-radius: 8px;
+    background-color: var(--fundo-sidebar);
+    text-align: center;
+}
+
+.vazio-ativo-agora strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--texto-claro);
+    font-size: 15px;
+}
+
+.vazio-ativo-agora p {
+    color: var(--texto-muted);
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .cabecalho-amigos {
@@ -330,8 +554,7 @@ body {
     display: none;
     flex: 1;
     padding: 24px 32px;
-    overflow-y: auto;
-    max-width: 780px;
+    width: 100%;
 }
 
 .conteudo-lista-amigos.ativo,
@@ -494,15 +717,52 @@ body {
 }
 
 .rodape-academico {
+    width: 100%;
     padding: 10px 32px;
     font-size: 11px;
     color: var(--texto-muted);
+    text-align: center;
 }
 
 /* breakpoint mobile (<= 768px) */
+@media (max-width: 1050px) {
+    .layout-aplicativo {
+        --largura-rail-servidores: 56px;
+        grid-template-columns: var(--largura-rail-servidores) 180px minmax(0, 1fr);
+    }
+
+    .icone-servidor::before {
+        left: -4px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .barra-ativo-agora {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .cabecalho-amigos {
+        height: auto;
+        min-height: 48px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 16px;
+    }
+
+    .abas-amigos {
+        flex-wrap: wrap;
+    }
+}
+
 @media (max-width: 768px) {
     .layout-aplicativo {
         grid-template-columns: 72px 1fr;
+    }
+
+    .icone-servidor::before {
+        left: -12px;
     }
 
     .area-amigos {

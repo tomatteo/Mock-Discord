@@ -1,3 +1,4 @@
+//esse arquivo irá ser excluido futuramente com a implenteacao do php e do banco de dados, mas por enquanto ele é necessário para o funcionamento do mock discord
 document.addEventListener("DOMContentLoaded", () => {
     const listaTexto = document.getElementById("lista-canais-texto");
     const listaVoz = document.getElementById("lista-canais-voz");
@@ -21,6 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const chaveHistorico = "mock_discord_mensagens_canais";
     const parametros = new URLSearchParams(window.location.search);
     const servidorSelecionado = parametros.get("servidor") || "Comunidade IFC";
+    const permissoes = window.permissoesServidor;
+    if (permissoes.servidorFoiExcluido(servidorSelecionado)) {
+        window.location.replace("inicio.html");
+        return;
+    }
+    const cargoUsuario = permissoes.obterCargo(servidorSelecionado);
+    const podeGerenciarCanais = permissoes.podeGerenciarServidor(servidorSelecionado);
     const servidorPersonalizado = servidorSelecionado !== "Comunidade IFC";
     const configServidor = JSON.parse(localStorage.getItem("mock_discord_server_config") || "null");
     const nomeServidor = servidorSelecionado === "Comunidade IFC"
@@ -39,13 +47,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".barra-servidores [data-servidor]").forEach((icone) => {
         const nome = icone.dataset.servidor;
-        icone.classList.toggle("ativo", nome === servidorSelecionado);
+        const estaAtivo = nome === servidorSelecionado;
+        icone.classList.toggle("ativo", estaAtivo);
         icone.href = `servidor.html?${new URLSearchParams({ servidor: nome })}`;
+        if (estaAtivo) {
+            icone.setAttribute("aria-current", "page");
+        } else {
+            icone.removeAttribute("aria-current");
+        }
     });
 
     const linkConfiguracoes = document.getElementById("link-config-servidor");
     if (linkConfiguracoes) {
         linkConfiguracoes.href = `config-servidor.html?${new URLSearchParams({ servidor: servidorSelecionado })}`;
+        linkConfiguracoes.hidden = !podeGerenciarCanais;
+        linkConfiguracoes.setAttribute(
+            "aria-label",
+            podeGerenciarCanais ? "Configurações do servidor" : `Seu cargo é ${cargoUsuario}; sem acesso às configurações`
+        );
+    }
+
+    ["botao-adicionar-texto", "botao-adicionar-voz"].forEach((id) => {
+        const botao = document.getElementById(id);
+        botao.disabled = !podeGerenciarCanais;
+        if (!podeGerenciarCanais) {
+            botao.title = "Somente administradores e moderadores podem criar canais.";
+        }
+    });
+    const botaoConvidar = document.getElementById("botao-convidar-servidor");
+    botaoConvidar.disabled = !podeGerenciarCanais;
+    if (!podeGerenciarCanais) {
+        botaoConvidar.title = "Somente administradores e moderadores podem convidar pessoas.";
     }
 
     function lerCanaisDaLista(lista, atributo, prefixo) {
@@ -218,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function abrirDialogo(acao, tipo, canal = null) {
+        if (!podeGerenciarCanais) return;
         operacaoDialogo = { acao, tipo, canal };
         erroDialogo.textContent = "";
         document.getElementById("titulo-dialogo-canal").textContent =
@@ -247,6 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(menuContextual);
 
     function abrirMenuContextual(evento, tipo) {
+        if (!podeGerenciarCanais) return;
         const item = evento.target.closest(".item-canal");
         if (!item) return;
         evento.preventDefault();
@@ -287,6 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     menuContextual.addEventListener("click", (evento) => {
+        if (!podeGerenciarCanais) return;
         const botao = evento.target.closest("button[data-acao]");
         if (!botao || !canalNoMenu) return;
         const { tipo, canal } = canalNoMenu;
@@ -320,6 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     formularioCanal.addEventListener("submit", (evento) => {
         evento.preventDefault();
+        if (!podeGerenciarCanais) return;
         const nome = inputNomeCanal.value.trim();
         if (!nome) {
             erroDialogo.textContent = "Digite um nome para o canal.";

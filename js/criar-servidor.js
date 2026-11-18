@@ -17,15 +17,27 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderizarServidoresSalvos() {
         const lista = JSON.parse(localStorage.getItem("mock_discord_servidores") || "[]");
         const botaoMais = barraServidores.querySelector(".adicionar-servidor");
+        const servidorPadrao = barraServidores.querySelector('[data-servidor="Comunidade IFC"]');
+        const servidoresExcluidos = JSON.parse(localStorage.getItem("mock_discord_servidores_excluidos") || "[]");
+        const servidorAtual = new URLSearchParams(window.location.search).get("servidor");
 
         // Remove clones anteriores para evitar duplicação
         barraServidores.querySelectorAll(".servidor-customizado").forEach((el) => el.remove());
+        if (servidorPadrao) {
+            servidorPadrao.hidden = Array.isArray(servidoresExcluidos)
+                && servidoresExcluidos.includes("Comunidade IFC");
+        }
 
         lista.forEach((srv) => {
             const link = document.createElement("a");
             link.href = `servidor.html?servidor=${encodeURIComponent(srv.nome)}`;
             link.className = "icone-servidor servidor-customizado";
+            link.dataset.servidor = srv.nome;
             link.title = srv.nome;
+            if (srv.nome === servidorAtual) {
+                link.classList.add("ativo");
+                link.setAttribute("aria-current", "page");
+            }
 
             if (srv.icone) {
                 link.innerHTML = `<img src="${srv.icone}" alt="${srv.nome}">`;
@@ -177,9 +189,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const servidoresSalvos = JSON.parse(localStorage.getItem("mock_discord_servidores") || "[]");
+        const servidoresExcluidos = JSON.parse(localStorage.getItem("mock_discord_servidores_excluidos") || "[]");
+        const nomeJaUsado = servidoresSalvos.some((servidor) =>
+            servidor.nome.toLowerCase() === nomeServidor.toLowerCase()
+        ) || (Array.isArray(servidoresExcluidos)
+            && servidoresExcluidos.some((nome) => nome.toLowerCase() === nomeServidor.toLowerCase()));
+        if (nomeJaUsado) {
+            erroModal.textContent = "Já existe um servidor com esse nome.";
+            inputNome.focus();
+            return;
+        }
+
+        const usuarioAtual = window.permissoesServidor?.obterUsuarioAtual();
+        const idCriador = window.permissoesServidor?.identificarUsuario(usuarioAtual);
         servidoresSalvos.push({
             nome: nomeServidor,
-            icone: iconeSelecionadoBase64
+            icone: iconeSelecionadoBase64,
+            criador: idCriador || ""
         });
         localStorage.setItem("mock_discord_servidores", JSON.stringify(servidoresSalvos));
 

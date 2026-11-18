@@ -99,96 +99,46 @@
             </nav>
         </header>
 
-        <!-- conteudo das listas (disponíveis / todos) -->
-        <section class="conteudo-lista-amigos ativo" id="secao-lista-amigos">
-            <div class="barra-busca-amigos">
-                <input type="search" id="input-busca-amigos" placeholder="Buscar" aria-label="Buscar amigos">
-                <i class="bi bi-search"></i>
+        <div class="corpo-amigos">
+            <div class="coluna-principal-amigos">
+                <section class="conteudo-lista-amigos ativo" id="secao-lista-amigos">
+                    <div class="barra-busca-amigos">
+                        <input type="search" id="input-busca-amigos" placeholder="Buscar" aria-label="Buscar amigos">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <h2 class="contador-amigos" id="contador-amigos">ONLINE — 2</h2>
+                    <ul class="lista-amigos" id="lista-amigos"></ul>
+                </section>
+
+                <section class="conteudo-adicionar-amigo" id="secao-adicionar-amigo">
+                    <h2>ADICIONAR AMIGO</h2>
+                    <p>Você pode adicionar amigos com o nome de usuário deles no Mock Discord.</p>
+
+                    <form id="form-adicionar-amigo" class="form-add-amigo" novalidate>
+                        <input type="text" id="input-novo-amigo" placeholder="Digite um nome de usuário..." required>
+                        <button type="submit" class="btn-enviar-pedido">Enviar pedido de amizade</button>
+                    </form>
+                    <span class="feedback-amigo" id="feedback-amigo" role="status"></span>
+                </section>
+
+                <footer class="rodape-academico">
+                    Clone simplificado do Discord para trabalho acadêmico (IFC Campus Concórdia). Dados fictícios.
+                </footer>
             </div>
 
-            <h2 class="contador-amigos" id="contador-amigos">ONLINE — 2</h2>
-
-            <ul class="lista-amigos" id="lista-amigos">
-                <li class="item-amigo" data-status="online" data-amigo="amigo1">
-                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 1">
-                        <div class="avatar-amigo">
-                            <span class="ponto-status online"></span>
-                        </div>
-                        <div class="amigo-texto">
-                            <strong>amigo 1</strong>
-                            <span>Online</span>
-                        </div>
-                    </div>
-                    <div class="amigo-acoes">
-                        <button type="button" class="acao-circulo" title="Iniciar chamada de voz" aria-label="Ligar para amigo 1">
-                            <i class="bi bi-telephone-fill"></i>
-                        </button>
-                        <a href="dm.html?amigo=amigo1" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 1">
-                            <i class="bi bi-chat-fill"></i>
-                        </a>
-                    </div>
-                </li>
-
-                <li class="item-amigo" data-status="online" data-amigo="amigo2">
-                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 2">
-                        <div class="avatar-amigo">
-                            <span class="ponto-status online"></span>
-                        </div>
-                        <div class="amigo-texto">
-                            <strong>amigo 2</strong>
-                            <span>Online</span>
-                        </div>
-                    </div>
-                    <div class="amigo-acoes">
-                        <button type="button" class="acao-circulo" title="Iniciar chamada de voz" aria-label="Ligar para amigo 2">
-                            <i class="bi bi-telephone-fill"></i>
-                        </button>
-                        <a href="dm.html?amigo=amigo2" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 2">
-                            <i class="bi bi-chat-fill"></i>
-                        </a>
-                    </div>
-                </li>
-
-                <li class="item-amigo" data-status="offline" data-amigo="amigo3" hidden>
-                <div class="amigo-info" tabindex="0" role="link" aria-label="Abrir conversa com amigo 3">
-                        <div class="avatar-amigo">
-                            <span class="ponto-status offline"></span>
-                        </div>
-                        <div class="amigo-texto">
-                            <strong>amigo 3</strong>
-                            <span>Offline</span>
-                        </div>
-                    </div>
-                    <div class="amigo-acoes">
-                        <a href="dm.html?amigo=amigo3" class="acao-circulo" title="Enviar mensagem" aria-label="Conversar com amigo 3">
-                            <i class="bi bi-chat-fill"></i>
-                        </a>
-                    </div>
-                </li>
-            </ul>
-        </section>
-
-        <!-- Seçao "Adicionar Amigo" -->
-        <section class="conteudo-adicionar-amigo" id="secao-adicionar-amigo">
-            <h2>ADICIONAR AMIGO</h2>
-            <p>Você pode adicionar amigos com o nome de usuário deles no Mock Discord.</p>
-
-            <form id="form-adicionar-amigo" class="form-add-amigo" novalidate>
-                <input type="text" id="input-novo-amigo" placeholder="Digite um nome de usuário..." required>
-                <button type="submit" class="btn-enviar-pedido">Enviar pedido de amizade</button>
-            </form>
-            <span class="feedback-amigo" id="feedback-amigo" role="status"></span>
-        </section>
-
-        <footer class="rodape-academico">
-            Clone simplificado do Discord para trabalho acadêmico (IFC Campus Concórdia). Dados fictícios.
-        </footer>
+            <aside class="barra-ativo-agora" aria-label="Amigos ativos em chamada">
+                <h2>Ativo agora</h2>
+                <div class="lista-ativo-agora" id="lista-ativo-agora"></div>
+            </aside>
+        </div>
     </main>
 </div>
 
 <script src="../js/sessao.js"></script>
 <script src="../js/inicio.js"></script>
 <script src="../js/configuracoes-popup.js"></script>
+<script src="../js/permissoes-servidor.js"></script>
 <script src="../js/criar-servidor.js"></script>
 </body>
 </html>

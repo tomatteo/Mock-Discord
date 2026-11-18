@@ -32,8 +32,9 @@ body {
 
 /* Grid Principal Desktop (>= 1280px) */
 .layout-aplicativo {
+    --largura-rail-servidores: 72px;
     display: grid;
-    grid-template-columns: 72px 240px 1fr;
+    grid-template-columns: var(--largura-rail-servidores) 240px 1fr;
     height: 100vh;
     width: 100vw;
 }
@@ -50,6 +51,7 @@ body {
 }
 
 .icone-servidor {
+    position: relative;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -63,7 +65,28 @@ body {
     cursor: pointer;
     text-decoration: none;
     transition: border-radius 0.2s ease, background-color 0.2s ease;
-    overflow: hidden;
+    overflow: visible;
+}
+
+.icone-servidor::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    width: 4px;
+    height: 8px;
+    border-radius: 0 4px 4px 0;
+    background-color: var(--texto-claro);
+    transform: translateY(-50%);
+    transition: height 0.15s ease;
+}
+
+.icone-servidor:hover::before {
+    height: 20px;
+}
+
+.icone-servidor.ativo::before {
+    height: 40px;
 }
 
 .icone-servidor:hover,
@@ -288,7 +311,9 @@ body {
 
 /* Painel do Usuário Inferior */
 .painel-usuario {
-    height: 54px;
+    height: 64px;
+    width: calc(100% + var(--largura-rail-servidores));
+    margin-left: calc(0px - var(--largura-rail-servidores));
     background-color: var(--fundo-usuario);
     padding: 0 8px;
     display: flex;
@@ -304,8 +329,8 @@ body {
 }
 
 .avatar-circular {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background-color: #D9D9D9;
     position: relative;
@@ -333,7 +358,7 @@ body {
 }
 
 .nome-usuario {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--texto-claro);
     white-space: nowrap;
     overflow: hidden;
@@ -341,7 +366,7 @@ body {
 }
 
 .status-usuario {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--texto-secundario);
 }
 
@@ -366,10 +391,24 @@ body {
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+.botao-icone-pequeno:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+button.botao-icone:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+#link-config-servidor[hidden] {
+    display: none;
+}
+
 .botao-controle {
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
 }
 
 .botao-controle:hover,
@@ -615,7 +654,12 @@ body {
 /* Keep both navigation sidebars visible on narrower screens. */
 @media (max-width: 1279px) {
     .layout-aplicativo {
-        grid-template-columns: clamp(48px, 12vw, 64px) clamp(144px, 34vw, 220px) minmax(0, 1fr);
+        --largura-rail-servidores: clamp(48px, 12vw, 64px);
+        grid-template-columns: var(--largura-rail-servidores) clamp(144px, 34vw, 220px) minmax(0, 1fr);
+    }
+
+    .icone-servidor::before {
+        left: calc(24px - clamp(24px, 6vw, 32px));
     }
 
     .barra-canais {
