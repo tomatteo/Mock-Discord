@@ -55,6 +55,12 @@
 
 ### Prompt — Sobreposição do Painel do Usuário sobre a Barra de Servidores
 - **Ferramenta utilizada:** GitHub Copilot (VS Code)
-- **Arquivos envolvidos:** servidor.css, inicio.css e dm.css
+- **Arquivos envolvidos:** `servidor.css`, `inicio.css` e `dm.css`
 - **Prompt utilizado:** “Faça o painel inferior do usuário (.painel-usuario) se estender também por baixo da barra lateral de servidores. Mantenha a foto de perfil no canto esquerdo e os controles à direita. Aumente um pouco a altura do painel e o tamanho dos elementos, aplicando o mesmo visual nas páginas do servidor, início e mensagens diretas.”
-Como a resposta foi aproveitada e ajustada: O painel foi ampliado usando a largura da barra de servidores como variável, com width: calc(100% + ...) e margem negativa à esquerda. Assim, ele cobre as duas colunas laterais sem usar posicionamento fixo. O avatar foi alinhado à esquerda; o painel ficou com 64 px de altura, o avatar com 38 px e os botões com 34 px. As alterações foram aplicadas às três páginas.
+- **Como a resposta foi aproveitada e ajustada:** O painel foi ampliado usando a largura da barra de servidores como variável, com width: calc(100% + ...) e margem negativa à esquerda. Assim, ele cobre as duas colunas laterais sem usar posicionamento fixo. O avatar foi alinhado à esquerda; o painel ficou com 64 px de altura, o avatar com 38 px e os botões com 34 px. As alterações foram aplicadas às três páginas.
+
+### Prompt — Padronização da Tipografia em Todas as Telas
+- **Ferramenta utilizada:** GitHub Copilot no VS Code
+- **Arquivos envolvidos:** `tipografia.css`, `index.html`, `src/index.html`, `register.html`, `configuracoes.html`, `config-servidor.html`, `inicio.html`, `dm.html` e `servidor.html`.
+- **Prompt utilizado:** “Aplique ao site inteiro a pilha tipográfica 'gg sans', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif, carregando Noto Sans pelo Google Fonts. Preserve os tamanhos e pesos já definidos e use uma fonte monoespaçada nos blocos de código.”
+- **Como a resposta foi aproveitada e ajustada:** Foi criada uma folha tipográfica compartilhada, carregada nas páginas do projeto. Ela aplica a fonte ao corpo e aos controles de formulário; blocos de código usam Consolas com fallback monoespaçado. gg sans só será usada se estiver instalada localmente; caso contrário, o navegador usa Noto Sans.
