@@ -32,3 +32,6 @@ $servidores_liberados = $stmt->fetchAll();
         <i class="bi bi-plus-lg"></i>
     </button>
 </nav>
+<?php
+include __DIR__ . '/modalCriarServidor.php';
+?>
