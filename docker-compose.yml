@@ -1,0 +1,52 @@
+services:
+
+  # Aplicação PHP
+  web:
+    build: .
+    container_name: mock-discord-web
+    ports:
+      - "8080:80"
+    volumes:
+        - ./src:/var/www/html
+        - ./style:/var/www/html/style
+        - ./js:/var/www/html/js
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Banco de dados MySQL
+  db:
+    image: mysql:8.4
+    container_name: mock-discord-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: discord
+      MYSQL_USER: discord_user
+      MYSQL_PASSWORD: discord_password
+    volumes:
+      - dados_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Gerenciador visual do banco
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: mock-discord-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+# Persistência dos dados do MySQL
+volumes:
+  dados_mysql:
