@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <footer class="auth-footer">
             Não possui uma conta? 
-            <a href="register.html" class="auth-link">Registrar</a>
+            <a href="register.php" class="auth-link">Registrar</a>
         </footer>
     </main>
 
