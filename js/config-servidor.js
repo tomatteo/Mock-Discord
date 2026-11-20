@@ -26,14 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const servidorSelecionado = parametros.get("servidor") || "Comunidade IFC";
     const permissoes = window.permissoesServidor;
     if (permissoes.servidorFoiExcluido(servidorSelecionado)) {
-        window.location.replace("inicio.html");
+        window.location.replace("inicio.php");
         return;
     }
     const podeGerenciar = permissoes.podeGerenciarServidor(servidorSelecionado);
     const podeAdministrar = permissoes.podeAdministrar(servidorSelecionado);
     const urlServidor = servidorSelecionado
-        ? `servidor.html?${new URLSearchParams({ servidor: servidorSelecionado })}`
-        : "servidor.html";
+        ? `servidor.php?${new URLSearchParams({ servidor: servidorSelecionado })}`
+        : "servidor.php";
     if (!podeGerenciar) {
         window.location.replace(urlServidor);
         return;
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("mock_discord_servidores_excluidos", JSON.stringify(servidoresExcluidos));
 
         dialogoExcluirServidor.close();
-        window.location.href = "inicio.html";
+        window.location.href = "inicio.php";
     });
 
     function renderizarMembrosECargos() {
@@ -326,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 localStorage.setItem("mock_discord_mensagens_canais", JSON.stringify(mensagens));
                 permissoes.renomearServidor(servidorSelecionado, nomeLimpo);
-                window.location.href = `servidor.html?${new URLSearchParams({ servidor: nomeLimpo })}`;
+                window.location.href = `servidor.php?${new URLSearchParams({ servidor: nomeLimpo })}`;
                 return;
             }
         }

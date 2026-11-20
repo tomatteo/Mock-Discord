@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/includes/conexao.php';
+require_once __DIR__ . '/includes/autenticacao.php';
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,18 +19,9 @@
 
 <div class="layout-aplicativo">
     <!-- 1. Barra Lateral de Servidores -->
-    <nav class="barra-servidores" aria-label="Lista de servidores">
-        <a href="inicio.html" class="icone-servidor icone-inicio ativo" title="Página Inicial / Amigos">
-            <i class="bi bi-discord"></i>
-        </a>
-        <div class="divisoria-servidores"></div>
-        <a href="servidor.html?servidor=Comunidade%20IFC" class="icone-servidor" title="Comunidade IFC" data-servidor="Comunidade IFC">
-            <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
-        </a>
-        <button type="button" class="icone-servidor adicionar-servidor" id="btn-novo-servidor" title="Adicionar um servidor">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-    </nav>
+    <?php
+    include __DIR__ . 'includes/sidebarServidores.php';
+    ?>
 
     <!-- 2. Sidebar de Conversas Diretas -->
     <aside class="barra-dms" aria-label="Lista de conversas privadas">
@@ -74,7 +70,7 @@
                 <button type="button" class="btn-controle" id="btn-audio" title="Desativar áudio" aria-label="Fone de ouvido">
                     <i class="bi bi-headphones"></i>
                 </button>
-                <a href="configuracoes.html" class="btn-controle" title="Configurações" aria-label="Configurações">
+                <a href="configuracoes.php" class="btn-controle" title="Configurações" aria-label="Configurações">
                     <i class="bi bi-gear-fill"></i>
                 </a>
             </div>
@@ -87,7 +83,7 @@
         <header class="cabecalho-chat">
             <div class="info-contato-chat">
                 <!-- Seta de voltar visível apenas no Mobile (<= 768px) -->
-                <a href="inicio.html" class="btn-voltar-dm-mobile" title="Voltar para conversas" aria-label="Voltar para conversas">
+                <a href="inicio.php" class="btn-voltar-dm-mobile" title="Voltar para conversas" aria-label="Voltar para conversas">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div class="avatar-header">

@@ -18,7 +18,7 @@
                 <div class="avatar-usuario" id="avatar-inicial" aria-hidden="true">F</div>
                 <img id="img-avatar-sidebar" class="avatar-img-pequeno" src="" alt="Avatar do usuário logado" hidden>
                 <span class="nome-usuario" id="nome-usuario-sidebar">Nome Usuário</span>
-                <a href="inicio.html" class="btn-fechar-mobile-lista" aria-label="Fechar configurações">✕</a>
+                <a href="inicio.php" class="btn-fechar-mobile-lista" aria-label="Fechar configurações">✕</a>
             </header>
 
             <nav class="config-nav">
@@ -34,7 +34,7 @@
             </nav>
 
             <div class="sidebar-acoes-extra">
-                <a href="index.html" id="btn-sair-conta" class="btn-sair">Sair da Conta</a>
+                <a href="index.php" id="btn-sair-conta" class="btn-sair">Sair da Conta</a>
             </div>
         </aside>
 
@@ -50,7 +50,7 @@
             </header>
 
             <!-- Botão Fechar Desktop (X no canto superior direito) -->
-            <a href="inicio.html" class="btn-fechar-desktop" title="Fechar Configurações" aria-label="Fechar configurações">
+            <a href="inicio.php" class="btn-fechar-desktop" title="Fechar Configurações" aria-label="Fechar configurações">
                 ✕
             </a>
 

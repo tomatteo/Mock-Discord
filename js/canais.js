@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const servidorSelecionado = parametros.get("servidor") || "Comunidade IFC";
     const permissoes = window.permissoesServidor;
     if (permissoes.servidorFoiExcluido(servidorSelecionado)) {
-        window.location.replace("inicio.html");
+        window.location.replace("inicio.php");
         return;
     }
     const cargoUsuario = permissoes.obterCargo(servidorSelecionado);
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const nome = icone.dataset.servidor;
         const estaAtivo = nome === servidorSelecionado;
         icone.classList.toggle("ativo", estaAtivo);
-        icone.href = `servidor.html?${new URLSearchParams({ servidor: nome })}`;
+        icone.href = `servidor.php?${new URLSearchParams({ servidor: nome })}`;
         if (estaAtivo) {
             icone.setAttribute("aria-current", "page");
         } else {
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const linkConfiguracoes = document.getElementById("link-config-servidor");
     if (linkConfiguracoes) {
-        linkConfiguracoes.href = `config-servidor.html?${new URLSearchParams({ servidor: servidorSelecionado })}`;
+        linkConfiguracoes.href = `config-servidor.php?${new URLSearchParams({ servidor: servidorSelecionado })}`;
         linkConfiguracoes.hidden = !podeGerenciarCanais;
         linkConfiguracoes.setAttribute(
             "aria-label",

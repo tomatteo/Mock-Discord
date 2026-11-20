@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const linksConfiguracoes = document.querySelectorAll(".controles-usuario a[href='configuracoes.html']");
+    const linksConfiguracoes = document.querySelectorAll(".controles-usuario a[href='configuracoes.php']");
     let fundoPopup = null;
     let quadroConfiguracoes = null;
     let elementoFocado = null;
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         quadroConfiguracoes = document.createElement("iframe");
         quadroConfiguracoes.title = "Configurações do usuário";
-        quadroConfiguracoes.src = "configuracoes.html?popup=1";
+        quadroConfiguracoes.src = "configuracoes.php?popup=1";
 
         dialogo.append(botaoFechar, quadroConfiguracoes);
         fundoPopup.appendChild(dialogo);
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fecharPopup();
         } else if (evento.data === "sair-configuracoes") {
             fecharPopup();
-            window.location.href = "../index.html";
+            window.location.href = "../index.php";
         }
     });
 });

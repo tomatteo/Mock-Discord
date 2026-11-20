@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 const linkConversa = document.createElement("a");
-                linkConversa.href = `dm.html?${new URLSearchParams({ amigo: amigo.id })}`;
+                linkConversa.href = `dm.php?${new URLSearchParams({ amigo: amigo.id })}`;
                 linkConversa.className = "acao-circulo";
                 linkConversa.title = `Enviar mensagem para ${amigo.nome}`;
                 linkConversa.setAttribute("aria-label", `Conversar com ${amigo.nome}`);
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cabecalho.append(avatar, informacoes);
 
             const chamada = document.createElement("a");
-            chamada.href = `servidor.html?${new URLSearchParams({ servidor: amigo.chamada.servidor })}`;
+            chamada.href = `servidor.php?${new URLSearchParams({ servidor: amigo.chamada.servidor })}`;
             chamada.className = "detalhe-chamada-ativo";
             chamada.title = `Abrir ${amigo.chamada.canal} em ${amigo.chamada.servidor}`;
 
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listaAmigos.addEventListener("click", (evento) => {
         const informacoes = evento.target.closest(".amigo-info");
         const item = informacoes?.closest(".item-amigo");
-        if (item) window.location.href = `dm.html?${new URLSearchParams({ amigo: item.dataset.amigo })}`;
+        if (item) window.location.href = `dm.php?${new URLSearchParams({ amigo: item.dataset.amigo })}`;
     });
 
     listaAmigos.addEventListener("keydown", (evento) => {
@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = informacoes?.closest(".item-amigo");
         if (!item) return;
         evento.preventDefault();
-        window.location.href = `dm.html?${new URLSearchParams({ amigo: item.dataset.amigo })}`;
+        window.location.href = `dm.php?${new URLSearchParams({ amigo: item.dataset.amigo })}`;
     });
 
     const formAdicionarAmigo = document.getElementById("form-adicionar-amigo");

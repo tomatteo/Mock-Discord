@@ -1,3 +1,10 @@
+<?php
+require_once __DIR__ . '/includes/conexao.php';
+require_once __DIR__ . '/includes/autenticacao.php';
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,25 +21,16 @@
 
 <div class="layout-aplicativo">
     <!-- barra lateral servidores -->
-    <nav class="barra-servidores" aria-label="Lista de servidores">
-        <a href="inicio.html" class="icone-servidor icone-inicio" title="Página Inicial / Amigos">
-            <i class="bi bi-discord"></i>
-        </a>
-        <div class="divisoria-servidores"></div>
-        <a href="servidor.html?servidor=Comunidade%20IFC" class="icone-servidor ativo" title="Comunidade IFC" data-servidor="Comunidade IFC">
-            <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
-        </a>
-        <button type="button" class="icone-servidor adicionar-servidor" id="botao-novo-servidor" title="Adicionar um servidor">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-    </nav>
+    <?php
+    include __DIR__ . '/includes/sidebarServidores.php';
+    ?>
 
     <!-- canais laterais e perfil do user -->
     <aside class="barra-canais" id="barra-canais" aria-label="Canais do servidor">
         <header class="cabecalho-servidor">
             <h1 class="nome-servidor">Comunidade IFC</h1>
             <div class="acoes-cabecalho-servidor">
-                <a href="config-servidor.html" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
+                <a href="config-servidor.php" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
                     <i class="bi bi-chevron-down"></i>
                 </a>
                 <button class="botao-icone" id="botao-convidar-servidor" title="Convidar pessoas" aria-label="Convidar pessoas">
@@ -115,7 +113,7 @@
                 <button class="botao-controle" id="botao-audio" title="Desativar áudio" aria-label="Fone de ouvido">
                     <i class="bi bi-headphones"></i>
                 </button>
-                <a href="configuracoes.html" class="botao-controle" title="Configurações de Usuário" aria-label="Configurações">
+                <a href="configuracoes.php" class="botao-controle" title="Configurações de Usuário" aria-label="Configurações">
                     <i class="bi bi-gear-fill"></i>
                 </a>
             </div>

@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lista.forEach((srv) => {
             const link = document.createElement("a");
-            link.href = `servidor.html?servidor=${encodeURIComponent(srv.nome)}`;
+            link.href = `servidor.php?servidor=${encodeURIComponent(srv.nome)}`;
             link.className = "icone-servidor servidor-customizado";
             link.dataset.servidor = srv.nome;
             link.title = srv.nome;
@@ -224,6 +224,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
 
         fecharModal();
-        window.location.href = `servidor.html?servidor=${encodeURIComponent(nomeServidor)}`;
+        window.location.href = `servidor.php?servidor=${encodeURIComponent(nomeServidor)}`;
     });
 });

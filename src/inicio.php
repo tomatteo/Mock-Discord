@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/includes/conexao.php';
+require_once __DIR__ . '/includes/autenticacao.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,18 +20,7 @@
 
 <div class="layout-aplicativo">
     <!-- 1. barra lateral de servidores -->
-    <nav class="barra-servidores" aria-label="Lista de servidores">
-        <a href="inicio.html" class="icone-servidor icone-inicio ativo" title="Página Inicial / Amigos">
-            <i class="bi bi-discord"></i>
-        </a>
-        <div class="divisoria-servidores"></div>
-        <a href="servidor.html?servidor=Comunidade%20IFC" class="icone-servidor" title="Comunidade IFC" data-servidor="Comunidade IFC">
-            <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
-        </a>
-        <button type="button" class="icone-servidor adicionar-servidor" id="btn-novo-servidor" title="Adicionar um servidor">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-    </nav>
+    <?php include __DIR__ . '/includes/sidebarServidores.php' ?>
 
     <!-- sidebar de dms -->
     <aside class="barra-dms" aria-label="Mensagens Diretas">
@@ -40,19 +35,19 @@
         <div class="lista-dms-container">
             <ul class="lista-dms" id="lista-dms">
                 <li>
-                    <a href="dm.html?amigo=amigo1" class="item-dm" data-amigo="amigo1">
+                    <a href="dm.php?amigo=amigo1" class="item-dm" data-amigo="amigo1">
                         <div class="avatar-dm"><span class="ponto-status online"></span></div>
                         <span class="nome-dm">amigo 1</span>
                     </a>
                 </li>
                 <li>
-                    <a href="dm.html?amigo=amigo2" class="item-dm" data-amigo="amigo2">
+                    <a href="dm.php?amigo=amigo2" class="item-dm" data-amigo="amigo2">
                         <div class="avatar-dm"><span class="ponto-status online"></span></div>
                         <span class="nome-dm">amigo 2</span>
                     </a>
                 </li>
                 <li>
-                    <a href="dm.html?amigo=amigo3" class="item-dm" data-amigo="amigo3">
+                    <a href="dm.php?amigo=amigo3" class="item-dm" data-amigo="amigo3">
                         <div class="avatar-dm"><span class="ponto-status ausente"></span></div>
                         <span class="nome-dm">amigo 3</span>
                     </a>
@@ -78,7 +73,7 @@
                 <button type="button" class="btn-controle" id="btn-audio" title="Desativar áudio" aria-label="Fone de ouvido">
                     <i class="bi bi-headphones"></i>
                 </button>
-                <a href="configuracoes.html" class="btn-controle" title="Configurações" aria-label="Configurações">
+                <a href="configuracoes.php" class="btn-controle" title="Configurações" aria-label="Configurações">
                     <i class="bi bi-gear-fill"></i>
                 </a>
             </div>
