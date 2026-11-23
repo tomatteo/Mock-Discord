@@ -71,3 +71,7 @@
 - **Arquivos envolvidos:** `tipografia.css`, `index.html`, `src/index.html`, `register.html`, `configuracoes.html`, `config-servidor.html`, `inicio.html`, `dm.html` e `servidor.html`.
 - **Prompt utilizado:** “Aplique ao site inteiro a pilha tipográfica 'gg sans', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif, carregando Noto Sans pelo Google Fonts. Preserve os tamanhos e pesos já definidos e use uma fonte monoespaçada nos blocos de código.”
 - **Como a resposta foi aproveitada e ajustada:** Foi criada uma folha tipográfica compartilhada, carregada nas páginas do projeto. Ela aplica a fonte ao corpo e aos controles de formulário; blocos de código usam Consolas com fallback monoespaçado. gg sans só será usada se estiver instalada localmente; caso contrário, o navegador usa Noto Sans.
+
+### Prompt - Retire toda a logica de dados do javascript, para ele não cadastrar nada e também não utilizar os dados ficticios dele
+- **Ferramenta Utilizada: ** Claude
+- **Arquivos envolvidos: **  `auth.js`,`canais.js`,`config-servidor.js`,`configuracoes-popup.js`,`criar-servidor.js`,`dm.js`, `inicio.ja`,`mensagens.js`,`sassao.js`,`configuracoes.js`
