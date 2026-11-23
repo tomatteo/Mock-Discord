@@ -1,7 +1,52 @@
 <?php
 require_once __DIR__ . '/includes/conexao.php';
 require_once __DIR__ . '/includes/autenticacao.php';
+verificarLogin();
 
+$idServidor = filter_input(INPUT_GET, 'servidor', FILTER_VALIDATE_INT);
+if (!$idServidor) {
+    header('Location: inicio.php');
+    exit;
+}
+
+$stmt = $pdo->prepare(
+    'SELECT s.id, s.nome
+     FROM servidores s
+     INNER JOIN servidores_usuario su ON su.id_servidor = s.id
+     WHERE s.id = :servidor AND su.id_usuario = :usuario'
+);
+$stmt->execute([
+    ':servidor' => $idServidor,
+    ':usuario' => $_SESSION['usuario_id']
+]);
+$servidorAtual = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$servidorAtual) {
+    header('Location: inicio.php');
+    exit;
+}
+
+// Carrega os canais de texto e mantém a seleção limitada a este servidor.
+$stmt = $pdo->prepare(
+    "SELECT id, nome
+     FROM canais
+     WHERE id_servidor = :servidor AND tipo = 'texto'
+     ORDER BY id"
+);
+$stmt->execute([':servidor' => $idServidor]);
+$canaisTexto = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$idCanalSelecionado = filter_input(INPUT_GET, 'canal', FILTER_VALIDATE_INT);
+$canalSelecionado = null;
+
+foreach ($canaisTexto as $canalTexto) {
+    if ((int) $canalTexto['id'] === $idCanalSelecionado) {
+        $canalSelecionado = $canalTexto;
+        break;
+    }
+}
+
+$canalSelecionado ??= $canaisTexto[0] ?? null;
+
+$vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 ?>
 
 
@@ -10,7 +55,7 @@ require_once __DIR__ . '/includes/autenticacao.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Discord</title>
+    <title><?= htmlspecialchars($servidorAtual['nome'], ENT_QUOTES, 'UTF-8') ?> - Mock Discord</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style/servidor.css?v=<?= filemtime(__DIR__ . '/style/servidor.css') ?>">
     <link rel="stylesheet" href="../style/configuracoes-popup.css">
@@ -28,7 +73,7 @@ require_once __DIR__ . '/includes/autenticacao.php';
     <!-- canais laterais e perfil do user -->
     <aside class="barra-canais" id="barra-canais" aria-label="Canais do servidor">
         <header class="cabecalho-servidor">
-            <h1 class="nome-servidor">Comunidade IFC</h1>
+            <h1 class="nome-servidor"><?= htmlspecialchars($servidorAtual['nome'], ENT_QUOTES, 'UTF-8') ?></h1>
             <div class="acoes-cabecalho-servidor">
                 <a href="config-servidor.php" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
                     <i class="bi bi-chevron-down"></i>
@@ -48,19 +93,21 @@ require_once __DIR__ . '/includes/autenticacao.php';
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
-                <ul id="lista-canais-texto" role="list">
-                    <li class="item-canal ativo" data-canal="geral">
-                        <i class="bi bi-hash"></i> <span>geral</span>
-                    </li>
-                    <li class="item-canal" data-canal="avisos">
-                        <i class="bi bi-hash"></i> <span>avisos</span>
-                    </li>
-                    <li class="item-canal" data-canal="dúvidas">
-                        <i class="bi bi-hash"></i> <span>dúvidas</span>
-                    </li>
-                    <li class="item-canal" data-canal="projetos">
-                        <i class="bi bi-hash"></i> <span>projetos</span>
-                    </li>
+                <ul id="lista-canais-texto" role="list" data-servidor-id="<?= (int) $idServidor ?>">
+                    <?php foreach ($canaisTexto as $canalTexto): ?>
+                        <?php $canalAtivo = (int) $canalTexto['id'] === (int) ($canalSelecionado['id'] ?? 0); ?>
+                        <li
+                            class="item-canal<?= $canalAtivo ? ' ativo' : '' ?>"
+                            data-canal-id="<?= (int) $canalTexto['id'] ?>"
+                            data-canal="<?= htmlspecialchars($canalTexto['nome'], ENT_QUOTES, 'UTF-8') ?>"
+                            role="button"
+                            tabindex="0"
+                            aria-pressed="<?= $canalAtivo ? 'true' : 'false' ?>"
+                        >
+                            <i class="bi bi-hash" aria-hidden="true"></i>
+                            <span><?= htmlspecialchars($canalTexto['nome'], ENT_QUOTES, 'UTF-8') ?></span>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </section>
 
@@ -168,7 +215,7 @@ require_once __DIR__ . '/includes/autenticacao.php';
         <header class="cabecalho-conversa">
             <div class="grupo-titulo-conversa">
                 <i class="bi bi-hash simbolo-canal"></i>
-                <h2 id="titulo-canal-ativo">geral</h2>
+                <h2 id="titulo-canal-ativo"><?= htmlspecialchars($canalSelecionado['nome'] ?? 'Selecione um canal', ENT_QUOTES, 'UTF-8') ?></h2>
             </div>
 
             <div class="cabecalho-conversa">
@@ -200,8 +247,10 @@ require_once __DIR__ . '/includes/autenticacao.php';
                 <input
                     type="text"
                     id="input-mensagem"
-                    placeholder="Conversar em # geral"
+                    placeholder="Conversar em # <?= htmlspecialchars($canalSelecionado['nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                     aria-label="Digite sua mensagem"
+                    maxlength="250"
+                    <?= $canalSelecionado ? '' : 'disabled' ?>
                     required
                 >
                 <button type="submit" class="botao-enviar" title="Enviar mensagem" aria-label="Enviar mensagem">
@@ -216,9 +265,22 @@ require_once __DIR__ . '/includes/autenticacao.php';
     </main>
 </div>
 
-<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+<script src="http://<?= htmlspecialchars($vozHost, ENT_QUOTES, 'UTF-8') ?>:3001/socket.io/socket.io.js" onerror="console.error('Servidor de voz indisponível na porta 3001.')"></script>
 <script>
-    const socket = io("http://localhost:3001");
+    const hostVoz = window.location.hostname;
+    const socket = io(`http://${hostVoz}:3001`);
+    const audioRemotoContainer = document.createElement("div");
+    audioRemotoContainer.hidden = true;
+    document.body.appendChild(audioRemotoContainer);
+    let streamLocal = null;
+    let streamLocalPromise = null;
+    const conexoesPares = new Map();
+    const candidatosPendentes = new Map();
+    const configuracaoRtc = {
+        iceServers: [
+            { urls: "stun:stun.l.google.com:19302" }
+        ]
+    };
 
     socket.on("connect", () => {
         console.log("Socket conectado:", socket.id);
@@ -244,6 +306,142 @@ require_once __DIR__ . '/includes/autenticacao.php';
         foneEnsurdecido: "M12 3C7.03 3 3 7.03 3 12V19C3 20.1 3.9 21 5 21H9V13H5V12C5 8.13 8.13 5 12 5C15.87 5 19 8.13 19 12V13H15V21H19C20.1 21 21 20.1 21 19V12C21 7.03 16.97 3 12 3Z",
         headsetConectado: "M12 3C7.03 3 3 7.03 3 12V19C3 20.1 3.9 21 5 21H9V13H5V12C5 8.13 8.13 5 12 5C15.87 5 19 8.13 19 12V13H15V21H19C20.1 21 21 20.1 21 19V12C21 7.03 16.97 3 12 3Z"
     };
+    let microfoneMutado = false;
+    let audioEnsurdecido = false;
+
+    function obterStreamLocal() {
+        if (streamLocal) return Promise.resolve(streamLocal);
+        if (streamLocalPromise) return streamLocalPromise;
+        if (!navigator.mediaDevices?.getUserMedia) {
+            console.error("Este navegador não permite acessar o microfone nesta página.");
+            return Promise.resolve(null);
+        }
+
+        streamLocalPromise = navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            },
+            video: false
+        }).then((stream) => {
+            streamLocal = stream;
+            stream.getAudioTracks().forEach((track) => {
+                track.enabled = !microfoneMutado;
+            });
+            return stream;
+        }).catch((erro) => {
+            console.error("Não foi possível acessar o microfone:", erro);
+            return null;
+        }).finally(() => {
+            streamLocalPromise = null;
+        });
+        return streamLocalPromise;
+    }
+
+    function criarConexaoPar(socketId, salaId) {
+        const conexaoExistente = conexoesPares.get(socketId);
+        if (conexaoExistente) return conexaoExistente;
+
+        const peer = new RTCPeerConnection(configuracaoRtc);
+        conexoesPares.set(socketId, peer);
+
+        if (streamLocal) {
+            streamLocal.getTracks().forEach((track) => peer.addTrack(track, streamLocal));
+        }
+
+        peer.onicecandidate = (evento) => {
+            if (evento.candidate && salaVozAtual === salaId) {
+                socket.emit("voz:candidato", {
+                    destino: socketId,
+                    candidato: evento.candidate
+                });
+            }
+        };
+
+        peer.ontrack = (evento) => {
+            let audio = audioRemotoContainer.querySelector(`audio[data-socket-id="${socketId}"]`);
+            if (!audio) {
+                audio = document.createElement("audio");
+                audio.dataset.socketId = socketId;
+                audio.autoplay = true;
+                audioRemotoContainer.appendChild(audio);
+            }
+            audio.srcObject = evento.streams[0];
+            audio.muted = audioEnsurdecido;
+            audio.play().catch((erro) => {
+                console.error("Não foi possível reproduzir o áudio remoto:", erro);
+            });
+        };
+
+        return peer;
+    }
+
+    async function aplicarCandidatosPendentes(socketId, peer) {
+        const candidatos = candidatosPendentes.get(socketId) || [];
+        candidatosPendentes.delete(socketId);
+        for (const candidato of candidatos) {
+            try {
+                await peer.addIceCandidate(candidato);
+            } catch (erro) {
+                console.error("Não foi possível adicionar candidato ICE:", erro);
+            }
+        }
+    }
+
+    async function iniciarOferta(socketId, salaId) {
+        const stream = await obterStreamLocal();
+        if (!stream || salaVozAtual !== salaId) return;
+        const peer = criarConexaoPar(socketId, salaId);
+        if (peer.signalingState !== "stable") return;
+        try {
+            const oferta = await peer.createOffer();
+            await peer.setLocalDescription(oferta);
+            socket.emit("voz:oferta", { destino: socketId, descricao: oferta });
+        } catch (erro) {
+            encerrarConexaoPar(socketId);
+            console.error("Não foi possível iniciar a conexão de voz:", erro);
+        }
+    }
+
+    async function responderOferta(dados) {
+        if (dados.salaId !== salaVozAtual) return;
+        const stream = await obterStreamLocal();
+        if (!stream) return;
+        try {
+            const peer = criarConexaoPar(dados.origem, dados.salaId);
+            await peer.setRemoteDescription(dados.descricao);
+            await aplicarCandidatosPendentes(dados.origem, peer);
+            const resposta = await peer.createAnswer();
+            await peer.setLocalDescription(resposta);
+            socket.emit("voz:resposta", { destino: dados.origem, descricao: resposta });
+        } catch (erro) {
+            encerrarConexaoPar(dados.origem);
+            console.error("Não foi possível responder à conexão de voz:", erro);
+        }
+    }
+
+    function encerrarConexaoPar(socketId) {
+        const peer = conexoesPares.get(socketId);
+        peer?.close();
+        conexoesPares.delete(socketId);
+        candidatosPendentes.delete(socketId);
+        audioRemotoContainer.querySelector(`audio[data-socket-id="${socketId}"]`)?.remove();
+    }
+
+    function encerrarConexoesPares() {
+        conexoesPares.forEach((peer) => peer.close());
+        conexoesPares.clear();
+        candidatosPendentes.clear();
+        audioRemotoContainer.replaceChildren();
+    }
+
+    function enviarEstadoVoz() {
+        socket.emit("voz:estado", {
+            mutado: microfoneMutado,
+            ensurdecido: audioEnsurdecido
+        });
+    }
 
     function criarIconeEstado(tipo, titulo, mutado = false) {
         const svg = document.createElementNS(namespaceSvg, "svg");
@@ -290,6 +488,11 @@ require_once __DIR__ . '/includes/autenticacao.php';
         salaVozAtual = "";
         painelVoz.hidden = true;
         listaVoz.querySelectorAll(".item-voz").forEach((item) => item.classList.remove("ativo"));
+
+        encerrarConexoesPares();
+
+        streamLocal?.getTracks().forEach((track) => track.stop());
+        streamLocal = null;
     }
 
     function renderizarParticipantes(salaId) {
@@ -341,13 +544,18 @@ require_once __DIR__ . '/includes/autenticacao.php';
         if (!canal) return;
 
         const novaSalaId = `comunidade-ifc:${canal.dataset.voz.toLowerCase()}`;
-        if (salaVozAtual && salaVozAtual !== novaSalaId && socket.id) {
-            const participantesAnteriores = participantesPorSala.get(salaVozAtual) || [];
-            participantesPorSala.set(
-                salaVozAtual,
-                participantesAnteriores.filter((participante) => participante.socketId !== socket.id)
-            );
-            renderizarParticipantes(salaVozAtual);
+        if (salaVozAtual && salaVozAtual !== novaSalaId) {
+            const salaAnterior = salaVozAtual;
+            socket.emit("voz:sair");
+            if (socket.id) {
+                const participantesAnteriores = participantesPorSala.get(salaAnterior) || [];
+                participantesPorSala.set(
+                    salaAnterior,
+                    participantesAnteriores.filter((participante) => participante.socketId !== socket.id)
+                );
+                renderizarParticipantes(salaAnterior);
+            }
+            encerrarConexoesPares();
         }
         salaVozAtual = novaSalaId;
         listaVoz.querySelectorAll(".item-voz").forEach((item) => {
@@ -362,6 +570,7 @@ require_once __DIR__ . '/includes/autenticacao.php';
             salaId: salaVozAtual,
             nome: document.querySelector("[data-nome-usuario]")?.textContent.trim() || "Você"
         });
+        obterStreamLocal();
     });
 
     socket.on("voz:participantes", ({ salaId, participantes }) => {
@@ -369,6 +578,14 @@ require_once __DIR__ . '/includes/autenticacao.php';
         renderizarParticipantes(salaId);
         if (salaId === salaVozAtual) {
             atualizarPainelVoz(salaId);
+            obterStreamLocal().then((stream) => {
+                if (!stream) return;
+                participantes.forEach((participante) => {
+                    if (participante.socketId !== socket.id) {
+                        iniciarOferta(participante.socketId, salaId);
+                    }
+                });
+            });
         }
     });
 
@@ -388,6 +605,47 @@ require_once __DIR__ . '/includes/autenticacao.php';
             participantes.filter((participante) => participante.socketId !== socketId)
         );
         renderizarParticipantes(salaId);
+        if (salaId === salaVozAtual) encerrarConexaoPar(socketId);
+    });
+
+    socket.on("voz:participante-estado", ({ salaId, participante }) => {
+        const participantes = participantesPorSala.get(salaId) || [];
+        const indice = participantes.findIndex((item) => item.socketId === participante.socketId);
+        if (indice >= 0) participantes[indice] = participante;
+        else participantes.push(participante);
+        participantesPorSala.set(salaId, participantes);
+        renderizarParticipantes(salaId);
+    });
+
+    socket.on("voz:oferta", responderOferta);
+
+    socket.on("voz:resposta", async ({ salaId, origem, descricao }) => {
+        if (salaId !== salaVozAtual) return;
+        const peer = conexoesPares.get(origem);
+        if (peer) {
+            try {
+                await peer.setRemoteDescription(descricao);
+                await aplicarCandidatosPendentes(origem, peer);
+            } catch (erro) {
+                console.error("Não foi possível aplicar a resposta WebRTC:", erro);
+            }
+        }
+    });
+
+    socket.on("voz:candidato", async ({ salaId, origem, candidato }) => {
+        if (salaId !== salaVozAtual) return;
+        const peer = conexoesPares.get(origem);
+        if (!peer || !peer.remoteDescription) {
+            const candidatos = candidatosPendentes.get(origem) || [];
+            candidatos.push(candidato);
+            candidatosPendentes.set(origem, candidatos);
+            return;
+        }
+        try {
+            await peer.addIceCandidate(candidato);
+        } catch (erro) {
+            console.error("Não foi possível adicionar candidato ICE:", erro);
+        }
     });
 
     socket.on("voz:erro", ({ mensagem }) => {
@@ -395,11 +653,33 @@ require_once __DIR__ . '/includes/autenticacao.php';
     });
 
     botaoDesconectarVoz.addEventListener("click", () => encerrarConexaoVoz());
+
+    const botaoMicrofone = document.getElementById("botao-microfone");
+    const botaoAudio = document.getElementById("botao-audio");
+
+    botaoMicrofone.addEventListener("click", () => {
+        microfoneMutado = !microfoneMutado;
+        streamLocal?.getAudioTracks().forEach((track) => {
+            track.enabled = !microfoneMutado;
+        });
+        botaoMicrofone.title = microfoneMutado ? "Ativar microfone" : "Silenciar microfone";
+        enviarEstadoVoz();
+    });
+
+    botaoAudio.addEventListener("click", () => {
+        audioEnsurdecido = !audioEnsurdecido;
+        audioRemotoContainer.querySelectorAll("audio").forEach((audio) => {
+            audio.muted = audioEnsurdecido;
+        });
+        botaoAudio.title = audioEnsurdecido ? "Ativar áudio" : "Desativar áudio";
+        enviarEstadoVoz();
+    });
+
     socket.on("disconnect", () => encerrarConexaoVoz(false));
     window.addEventListener("beforeunload", () => socket.emit("voz:sair"));
 </script>
 <script src="../js/permissoes-servidor.js"></script>
-<script src="../js/canais.js"></script>
+<script src="../js/canais.js?v=<?= filemtime(__DIR__ . '/js/canais.js') ?>"></script>
 <script src="../js/mensagens.js"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/criar-servidor.js"></script>

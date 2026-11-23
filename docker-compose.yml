@@ -10,6 +10,7 @@ services:
         - ./src:/var/www/html
         - ./style:/var/www/html/style
         - ./js:/var/www/html/js
+        - server_icons:/var/www/html/img
     depends_on:
       db:
         condition: service_healthy
@@ -50,3 +51,4 @@ services:
 # Persistência dos dados do MySQL
 volumes:
   dados_mysql:
+  server_icons:

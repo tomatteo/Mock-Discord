@@ -59,6 +59,13 @@
 - **Prompt utilizado:** “Faça o painel inferior do usuário (.painel-usuario) se estender também por baixo da barra lateral de servidores. Mantenha a foto de perfil no canto esquerdo e os controles à direita. Aumente um pouco a altura do painel e o tamanho dos elementos, aplicando o mesmo visual nas páginas do servidor, início e mensagens diretas.”
 - **Como a resposta foi aproveitada e ajustada:** O painel foi ampliado usando a largura da barra de servidores como variável, com width: calc(100% + ...) e margem negativa à esquerda. Assim, ele cobre as duas colunas laterais sem usar posicionamento fixo. O avatar foi alinhado à esquerda; o painel ficou com 64 px de altura, o avatar com 38 px e os botões com 34 px. As alterações foram aplicadas às três páginas.
 
+### Prompt — Servidor de Sinalização PeerJS em Node.js
+- **Ferramenta sugerida:** GitHub Copilot (VS Code)
+- **Documentação de referência:** [Documentação oficial do PeerJS](https://peerjs.com/)
+- **Arquivo a criar:** `backend/peer-server.js`
+- **Prompt completo:** *"Consulte a essa documentacao do PeerJS e analise a estrutura atual de `backend/`. Crie `peer-server.js` dentro da pasta `backend` pra iniciar um PeerServer,que deve apenas sinalizar e conectar os peers que vao participa das chamadas de voz (o audio deve continuar sendo transmitido diretamente entre os navegadores, sem passar pelo node.js)"*
+- **Finalidade esperada:** Disponibilizar a sinalização necessária para uma futura integração de chamadas WebRTC com PeerJS, mantendo o servidor responsável pela conexão e não pelo transporte do áudio.
+
 ### Prompt — Padronização da Tipografia em Todas as Telas
 - **Ferramenta utilizada:** GitHub Copilot no VS Code
 - **Arquivos envolvidos:** `tipografia.css`, `index.html`, `src/index.html`, `register.html`, `configuracoes.html`, `config-servidor.html`, `inicio.html`, `dm.html` e `servidor.html`.

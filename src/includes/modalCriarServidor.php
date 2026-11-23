@@ -11,7 +11,7 @@
             <h2 id="titulo-modal-servidor">Personalize o seu servidor</h2>
             <p>Deixe seu novo servidor com a sua cara dando um nome e um ícone a ele. Se quiser, é possível mudar depois.</p>
         </div>
-        <form id="form-criar-servidor" mthod="POST" novalidate>
+        <form id="form-criar-servidor" action="includes/criarServidor.php" method="POST" enctype="multipart/form-data" novalidate>
             <div class="area-upload-icone">
                 <label for="input-icone-novo-servidor" class="circulo-upload-servidor" id="circulo-upload-servidor" title="Enviar ícone do servidor">
                     <i class="bi bi-camera-fill"></i>
@@ -24,7 +24,7 @@
                 <label for="input-nome-novo-servidor">
                     Nome do servidor <span class="asterisco-obrigatorio">*</span>
                 </label>
-                <input type="text" id="input-nome-novo-servidor" name="nomeServidor" maxlength="50" required>
+                <input type="text" id="input-nome-novo-servidor" name="nomeServidor" maxlength="25" required>
                 <span class="erro-modal-servidor" id="erro-modal-servidor" role="alert"></span>
             </div>
 

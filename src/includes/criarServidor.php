@@ -1,84 +1,116 @@
 <?php
-require_once __DIR__ . '/includes/conexao.php';
-require_once __DIR__ . '/includes/autenticacao.php';
+require_once __DIR__ . '/conexao.php';
+require_once __DIR__ . '/autenticacao.php';
 verificarLogin();
 
-$user = $_SESSION['usuario_id'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../inicio.php');
+    exit;
+}
 
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $arquivo = $_FILES['imagemServidor'];
-    $pasta = '../img/';
-    $nomeServidor = $_POST['nomeServidor'];
+$nomeServidor = trim($_POST['nomeServidor'] ?? '');
+if (!preg_match('/\A.{2,25}\z/u', $nomeServidor)) {
+    http_response_code(422);
+    exit('O nome do servidor deve ter entre 2 e 25 caracteres.');
+}
 
-    if(empty($nomeServidor)){
-        die('O nome do servidor é obrigatório.');
+$iconeServidor = '';
+$arquivoMovido = null;
+$arquivo = $_FILES['arquivoServidor'] ?? null;
+
+if ($arquivo && $arquivo['error'] !== UPLOAD_ERR_NO_FILE) {
+    if ($arquivo['error'] !== UPLOAD_ERR_OK) {
+        http_response_code(400);
+        exit('Não foi possível enviar o ícone do servidor.');
     }
 
-    if($arquivo['error'] !== UPLOAD_ERR_OK){
-        die('Erro ao enviar o arquivo. ');
+    if ($arquivo['size'] > 5 * 1024 * 1024) {
+        http_response_code(422);
+        exit('O ícone do servidor não pode exceder 5 MB.');
     }
 
-    $tamanhoMaximo = 5 * 1024 * 1024;
-    if ($arquivo['size'] > $tamanhoMaximo) {
-        die('O arquivo excede o limite de 5 MB.');
-    }
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $tipoMime = $finfo->file($arquivo['tmp_name']);
     $tiposPermitidos = [
         'image/jpeg' => 'jpg',
-        'image/png'  => 'png',
+        'image/png' => 'png',
         'image/webp' => 'webp'
     ];
-
-    if (!array_key_exists($tipoMime, $tiposPermitidos)) {
-        die('Formato inválido. Envie apenas JPG, PNG ou WEBP.');
+    $tipoMime = (new finfo(FILEINFO_MIME_TYPE))->file($arquivo['tmp_name']);
+    if (!isset($tiposPermitidos[$tipoMime])) {
+        http_response_code(422);
+        exit('O ícone deve estar no formato JPG, PNG ou WEBP.');
     }
 
-    $extensao = $tiposPermitidos[$tipoMime];
-    $nomeUnico = uniqid('img_', true) . '.' . $extensao;
-    $caminhoCompleto = $pasta . $nomeUnico;
-
-    if (move_uploaded_file($arquivo['tmp_name'], $caminhoCompleto)){
-        echo "Imagem enviada com sucesso! Salva em: ". htmlspecialchars($caminhoCompleto);
-    }else{
-        echo "Falha ao salvar a imagem no servidor.";
+    $diretorioImagens = __DIR__ . '/../img';
+    if (!is_dir($diretorioImagens) && !mkdir($diretorioImagens, 0775, true) && !is_dir($diretorioImagens)) {
+        throw new RuntimeException('Não foi possível preparar o diretório de ícones.');
     }
 
-    $sql = "insert into servidores(nome, id_dono, icone, descricao, data_cadastro, cor) values (:nome, :dono, :icone, Null, now(), 'blue'); select LAST_INSERT_ID();";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':nome'=> $nomeServidor, 
-        ':dono'=> $user, 
-        ':icone'=> $caminhoCompleto
-    ]);
-    $servidor = $stmt->fetch();
-
-    $sqlCargo = "insert into servidor_cargos (nome, id_servidor, adm, moderador, membro, data_cadastro) values ('ADMINISTRADOR', :servidor, TRUE, FALSE, FALSE, now()); select LAST_INSERT_ID()";
-    $stmt = $pdo->prepare($sqlCargo);
-    $stmt->execute([
-        ':servidor' => $servidor
-    ]);
-    $cargo = $stmt->fetch();
-
-    $sqlCanalTexto = "insert into canais (nome, id_servidor, data_cadastro, tipo) values ('geral', :servidor, now(), 'texto')";
-    $stmt = $pdo->prepare($sqlCanalTexto);
-    $stmt->execute([
-        ':servidor' => $servidor
-    ]);
-
-    $sqlCanalVoz = "insert into canais (nome, id_servidor, data_cadastro, tipo) values ('geral', :servidor, now(), 'texto')";
-    $stmt = $pdo->prepare($sqlCanalVoz);
-    $stmt->execute([
-        ':servidor' => $servidor
-    ]);
-
-    $sqlServidorUsuario = "insert into servidores_usuario (id_cargo, id_servidor, id_usuarios, data_cadastro) values (:cargo, :servidor, :usuario, now())";
-    $stmt = $pdo->prepare($sqlServidorUsuario);
-    $stmt->execute([
-        ':cargo'=> $cargo,
-        ':servidor'=> $servidor,
-        ':usuario' => $user
-    ]);
+    $nomeArquivo = bin2hex(random_bytes(16)) . '.' . $tiposPermitidos[$tipoMime];
+    $arquivoMovido = $diretorioImagens . '/' . $nomeArquivo;
+    if (!move_uploaded_file($arquivo['tmp_name'], $arquivoMovido)) {
+        throw new RuntimeException('Não foi possível salvar o ícone do servidor.');
+    }
+    $iconeServidor = 'img/' . $nomeArquivo;
 }
-?>
+
+$pdo->beginTransaction();
+try {
+    $stmt = $pdo->prepare(
+        'INSERT INTO servidores (nome, id_dono, icone, descricao, cor)
+         VALUES (:nome, :dono, :icone, NULL, :cor)'
+    );
+    $stmt->execute([
+        ':nome' => $nomeServidor,
+        ':dono' => $_SESSION['usuario_id'],
+        ':icone' => $iconeServidor,
+        ':cor' => 'blue'
+    ]);
+    $idServidor = (int) $pdo->lastInsertId();
+
+    $stmt = $pdo->prepare(
+        'INSERT INTO servidor_cargos (nome, id_servidor, adm, moderador, membro)
+         VALUES (:nome, :servidor, TRUE, FALSE, FALSE)'
+    );
+    $stmt->execute([
+        ':nome' => 'ADMINISTRADOR',
+        ':servidor' => $idServidor
+    ]);
+    $idCargo = (int) $pdo->lastInsertId();
+
+    $stmt = $pdo->prepare(
+        'INSERT INTO canais (nome, id_servidor, tipo)
+         VALUES (:nome_texto, :servidor_texto, :tipo_texto),
+                (:nome_voz, :servidor_voz, :tipo_voz)'
+    );
+    $stmt->execute([
+        ':nome_texto' => 'geral',
+        ':servidor_texto' => $idServidor,
+        ':tipo_texto' => 'texto',
+        ':nome_voz' => 'geral',
+        ':servidor_voz' => $idServidor,
+        ':tipo_voz' => 'voz'
+    ]);
+
+    $stmt = $pdo->prepare(
+        'INSERT INTO servidores_usuario (id_cargo, id_servidor, id_usuario)
+         VALUES (:cargo, :servidor, :usuario)'
+    );
+    $stmt->execute([
+        ':cargo' => $idCargo,
+        ':servidor' => $idServidor,
+        ':usuario' => $_SESSION['usuario_id']
+    ]);
+
+    $pdo->commit();
+} catch (Throwable $erro) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    if ($arquivoMovido !== null && is_file($arquivoMovido)) {
+        unlink($arquivoMovido);
+    }
+    throw $erro;
+}
+
+header('Location: ../servidor.php?servidor=' . $idServidor);
+exit;

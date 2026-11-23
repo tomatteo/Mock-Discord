@@ -96,6 +96,11 @@ body {
 }
 
 .icone-inicio {
+    background-color: var(--fundo-principal);
+    border-radius: 50%;
+}
+
+.icone-inicio.ativo {
     background-color: var(--cor-primaria);
     border-radius: 16px;
 }
@@ -795,6 +800,10 @@ button.botao-icone:disabled {
     height: 40px;
     border-radius: 50%;
     background-color: #D9D9D9;
+    color: #232428;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
     flex-shrink: 0;
 }
 

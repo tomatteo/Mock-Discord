@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/conexao.php';
 require_once __DIR__ . '/includes/autenticacao.php';
+verificarLogin();
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +21,7 @@ require_once __DIR__ . '/includes/autenticacao.php';
 <div class="layout-aplicativo">
     <!-- 1. Barra Lateral de Servidores -->
     <?php
-    include __DIR__ . 'includes/sidebarServidores.php';
+    include __DIR__ . '/includes/sidebarServidores.php';
     ?>
 
     <!-- 2. Sidebar de Conversas Diretas -->

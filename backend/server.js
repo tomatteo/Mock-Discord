@@ -1,3 +1,4 @@
+//pagina responsvel por gerenciar as pessoas que estão em uma sala de voz, e gerenciar a comunicação entre elas
 const express = require("express");
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
@@ -7,12 +8,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: [
-            "http://127.0.0.1:5500",
-            "http://localhost:5500",
-            "http://localhost:8080",
-            "http://127.0.0.1:8080"
-        ]
+        origin: true
     }
 });
 
@@ -21,6 +17,10 @@ app.get("/health", (req, res) => {
 });
 
 const salasVoz = new Map();
+const canaisDeVoz = new Set([
+    "comunidade-ifc:geral",
+    "comunidade-ifc:estudos"
+]);
 
 function sairDaSalaVoz(socket) {
     const salaId = socket.data.salaVozId;
@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
         const salaId = typeof dados.salaId === "string" ? dados.salaId.trim() : "";
         const nome = typeof dados.nome === "string" ? dados.nome.trim() : "";
 
-        if (!salaId || salaId.length > 100 || !nome) {
+        if (!canaisDeVoz.has(salaId) || !nome) {
             socket.emit("voz:erro", { mensagem: "Sala ou nome inválido." });
             return;
         }
@@ -68,7 +68,9 @@ io.on("connection", (socket) => {
 
         const participante = {
             socketId: socket.id,
-            nome: nome.slice(0, 40)
+            nome: nome.slice(0, 40),
+            mutado: false,
+            ensurdecido: false
         };
 
         socket.join(salaId);
@@ -82,6 +84,72 @@ io.on("connection", (socket) => {
         socket.to(salaId).emit("voz:participante-entrou", {
             salaId,
             participante
+        });
+    });
+
+    socket.on("voz:estado", (dados = {}) => {
+        const salaId = socket.data.salaVozId;
+        const participante = salasVoz.get(salaId)?.get(socket.id);
+        if (!salaId || !participante) return;
+
+        participante.mutado = dados.mutado === true;
+        participante.ensurdecido = dados.ensurdecido === true;
+        socket.to(salaId).emit("voz:participante-estado", {
+            salaId,
+            participante
+        });
+    });
+
+    socket.on("voz:oferta", (dados = {}) => {
+        const salaId = socket.data.salaVozId;
+        const participantes = salasVoz.get(salaId);
+        if (
+            !salaId ||
+            typeof dados.destino !== "string" ||
+            !participantes?.has(dados.destino) ||
+            typeof dados.descricao?.type !== "string" ||
+            typeof dados.descricao?.sdp !== "string"
+        ) return;
+
+        io.to(dados.destino).emit("voz:oferta", {
+            salaId,
+            origem: socket.id,
+            descricao: dados.descricao
+        });
+    });
+
+    socket.on("voz:resposta", (dados = {}) => {
+        const salaId = socket.data.salaVozId;
+        const participantes = salasVoz.get(salaId);
+        if (
+            !salaId ||
+            typeof dados.destino !== "string" ||
+            !participantes?.has(dados.destino) ||
+            typeof dados.descricao?.type !== "string" ||
+            typeof dados.descricao?.sdp !== "string"
+        ) return;
+
+        io.to(dados.destino).emit("voz:resposta", {
+            salaId,
+            origem: socket.id,
+            descricao: dados.descricao
+        });
+    });
+
+    socket.on("voz:candidato", (dados = {}) => {
+        const salaId = socket.data.salaVozId;
+        const participantes = salasVoz.get(salaId);
+        if (
+            !salaId ||
+            typeof dados.destino !== "string" ||
+            !participantes?.has(dados.destino) ||
+            typeof dados.candidato?.candidate !== "string"
+        ) return;
+
+        io.to(dados.destino).emit("voz:candidato", {
+            salaId,
+            origem: socket.id,
+            candidato: dados.candidato
         });
     });
 
