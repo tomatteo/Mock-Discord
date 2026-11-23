@@ -1,7 +1,7 @@
 <form id="form-login" class="auth-form" method="POST" novalidate>            
     <div class="campo-grupo">
         <label for="login-identificador">
-            E-mail, usuário ou número de telefone <span class="asterisco-obrigatorio">*</span>
+            E-mail ou número de telefone <span class="asterisco-obrigatorio">*</span>
         </label>
         <input 
             type="text" 
