@@ -13,6 +13,38 @@ O objetivo do projeto é aplicar conceitos de estruturação semântica com HTML
 * **Aplicação Online (GitHub Pages):** https://tomatteo.github.io/Mock-Discord/
 * **Repositório no GitHub:** https://github.com/tomatteo/Mock-Discord
 
+## Rodar a Aplicação Completa com Docker e Cloudflare Tunnel
+
+O GitHub Pages publica apenas a versão estática. Para rodar a aplicação PHP com banco de dados e o servidor Node das chamadas, use o Docker Compose.
+
+1. Abra um terminal na pasta raiz do projeto e inicie os serviços:
+
+   ```bash
+   sudo docker compose up -d --build
+   ```
+
+2. Confira se os containers estão ativos e abra a aplicação localmente em [http://localhost:8080](http://localhost:8080):
+
+   ```bash
+   sudo docker compose ps
+   ```
+
+3. Para criar um link público temporário, abra outro terminal na pasta raiz e execute:
+
+   ```bash
+   ./cloudflared tunnel --url http://localhost:8080
+   ```
+
+4. Compartilhe o endereço `https://...trycloudflare.com` exibido pelo comando. Mantenha esse terminal aberto enquanto seus amigos estiverem usando o link; ao encerrar o túnel, o endereço deixa de funcionar.
+
+O túnel acima publica somente a aplicação web na porta `8080`. Chamadas de voz pela internet ainda precisam que o serviço de sinalização na porta `3001` também seja publicado de forma compatível com HTTPS e de um servidor TURN público. Portanto, o link do túnel permite acessar o site, mas ainda não garante chamadas de voz entre redes diferentes.
+
+Para encerrar o túnel, pressione `Ctrl+C` no terminal em que ele está rodando. Para parar os containers sem apagar os dados persistidos do banco:
+
+```bash
+sudo docker compose down
+```
+
 ---
 
 ## Integrantes
