@@ -1,11 +1,7 @@
 (() => {
     const chaveCargos = "mock_discord_cargos_servidor";
     const cargosValidos = ["Administrador", "Moderador", "Membro"];
-    const contasPadrao = [
-        { id: "filipe@discord.mock", username: "Filipe", nome: "Filipe Nunes" },
-        { id: "matteo@discord.mock", username: "Matteo", nome: "Matteo Thomé" },
-        { id: "joao@discord.mock", username: "Joao", nome: "João Veloso" }
-    ];
+    const contasPadrao = [];
 
     function lerJSON(chave, valorPadrao) {
         const salvo = localStorage.getItem(chave);
@@ -78,14 +74,7 @@
 
             obterContasConhecidas().forEach((conta) => {
                 let cargo = "Membro";
-                if (nomeServidor === "Comunidade IFC") {
-                    if (conta.id === "matteo@discord.mock") cargo = "Administrador";
-                    if (conta.id === "filipe@discord.mock" || conta.id === "joao@discord.mock") {
-                        cargo = "Moderador";
-                    }
-                } else if (conta.id === dono) {
-                    cargo = "Administrador";
-                }
+                if (conta.id === dono) cargo = "Administrador";
 
                 membros[conta.id] = { ...conta, cargo };
             });
@@ -94,7 +83,7 @@
                 membros[idAtual] = {
                     ...usuarioAtual,
                     id: idAtual,
-                    cargo: nomeServidor === "Comunidade IFC" ? "Membro" : "Administrador"
+                    cargo: "Administrador"
                 };
             }
 

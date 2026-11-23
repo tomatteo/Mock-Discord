@@ -24,7 +24,7 @@ $servidores_liberados = $stmt->fetchAll();
                     ]);
                     $servidores = $stmt->fetch(PDO::FETCH_ASSOC); 
     ?>
-    <a href="servidor.php?servidor=<?= htmlspecialchars($servidores['id']) ?>" class="icone-servidor" title="Comunidade IFC" data-servidor="Comunidade IFC">
+    <a href="servidor.php?servidor=<?= htmlspecialchars($servidores['id']) ?>" class="icone-servidor" title="<?= htmlspecialchars($servidores['nome']) ?>">
         <span class="icone-reserva"><i class="bi bi-people-fill"></i></span>
     </a>
     <?php endforeach; ?>

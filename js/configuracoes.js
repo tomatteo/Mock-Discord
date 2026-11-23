@@ -70,15 +70,15 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     if (usuarioSalvo) {
-        const nome = usuarioSalvo.username || usuarioSalvo.nome || "Filipe";
+        const nome = usuarioSalvo.username || usuarioSalvo.nome || "";
         const inicial = nome.charAt(0).toUpperCase();
         document.getElementById("avatar-inicial").textContent = inicial;
         document.getElementById("avatar-perfil").textContent = inicial;
         document.getElementById("nome-usuario-sidebar").textContent = nome;
         document.getElementById("perfil-username").textContent = nome;
         document.getElementById("valor-username").textContent = nome;
-        document.getElementById("valor-email").textContent = usuarioSalvo.email || "filipe@discord.mock";
-        document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone || "(49) 99999-0001";
+        document.getElementById("valor-email").textContent = usuarioSalvo.email || "";
+        document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone || "";
     }
 
     // ======================================================================
@@ -113,8 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
     salvarPreferenciasAudio();
     selectMic.addEventListener("change", salvarPreferenciasAudio);
     selectFalante.addEventListener("change", salvarPreferenciasAudio);
-    sliderMic.addEventListener("input", salvarPreferenciasAudio);
-    sliderFalante.addEventListener("input", salvarPreferenciasAudio);
+        function atualizarTextoVolumes() {
+        textoVolMic.textContent = `${sliderMic.value}%`;
+        textoVolFalante.textContent = `${sliderFalante.value}%`;
+    }
+
+    atualizarTextoVolumes();
+    sliderMic.addEventListener("input", atualizarTextoVolumes);
+    sliderFalante.addEventListener("input", atualizarTextoVolumes);
 
     // ======================================================================
     // 4. Medidor e Botão "Teste de microfone"
@@ -225,11 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    const fotoSalva = localStorage.getItem("mock_discord_avatar");
-    if (fotoSalva) {
-        aplicarFotoPerfil(fotoSalva);
-    }
-
     if (inputFoto) {
         inputFoto.addEventListener("change", (evento) => {
             const arquivo = evento.target.files[0];
@@ -246,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     ctx.drawImage(imgTemp, 0, 0, 128, 128);
 
                     const fotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
-                    localStorage.setItem("mock_discord_avatar", fotoBase64);
                     aplicarFotoPerfil(fotoBase64);
                 };
                 imgTemp.src = e.target.result;
@@ -257,7 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnRemoverFoto) {
         btnRemoverFoto.addEventListener("click", () => {
-            localStorage.removeItem("mock_discord_avatar");
             if (inputFoto) inputFoto.value = "";
             aplicarFotoPerfil(null);
         });
