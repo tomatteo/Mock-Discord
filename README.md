@@ -37,6 +37,12 @@ O objetivo do projeto é aplicar conceitos de estruturação semântica com HTML
 
 ## Funcionalidades Implementadas
 
+* **Amigos e membros de servidores (`src/includes/amigos.php`, `src/includes/membrosServidor.php`):**
+  * Solicitações por nome, ID ou `nome#ID`, com validação contra auto-adicionamento, contas inexistentes, duplicatas e amizades existentes.
+  * Lista de amigos e solicitações recebidas, com ações para aceitar ou recusar.
+  * Adição de amigos ao servidor aberto, sinalização de membros existentes e atualização dos membros por Socket.IO.
+* **Atualizações em tempo real (`backend/server.js`):**
+  * Socket.IO usa a sessão PHP existente e verifica no backend as permissões de amizade e de acesso ao servidor antes de publicar atualizações.
 * **Autenticação e Sessão (`index.html`, `src/index.html`, `src/cadastro.html`):**
   * Validação de formulários com mensagens de erro exibidas diretamente na interface (sem uso de `alert()`, `prompt()` ou `confirm()`).
   * Exibição dinâmica do nome do usuário autenticado no painel inferior de todas as telas e suporte a *logout* nas configurações.
@@ -56,6 +62,12 @@ O objetivo do projeto é aplicar conceitos de estruturação semântica com HTML
   * Edição de nome, ícone e cor da faixa do servidor com pré-visualização em tempo real e atalho pela tecla `ESC`.
 * **Design Responsivo (Desktop e Mobile):**
   * Adaptação automática para telas estreitas (`<= 768px`) com navegação em subtelas e botões de retorno dedicados.
+
+### Executar os serviços com Docker Compose
+
+Execute `docker compose up --build` na pasta `Mock-Discord/`. O Compose inicia PHP, MySQL e Socket.IO; na primeira inicialização, o banco executa `database/discord.sql`. O SQL de inicialização só é aplicado quando o volume MySQL é criado pela primeira vez.
+
+Na página inicial, use **Adicionar amigo** e informe o apelido, o ID numérico ou `apelido#ID`; os IDs aparecem junto aos nomes para resolver apelidos repetidos. As solicitações recebidas ficam na aba **Solicitações**. Em um servidor, use o botão **Convidar pessoas** para adicionar diretamente um amigo que ainda não seja membro.
 
 ---
 

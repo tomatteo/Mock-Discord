@@ -27,6 +27,7 @@ $servidoresDoUsuario = $stmt->fetchAll(PDO::FETCH_ASSOC);
         ?>
         <a
             href="servidor.php?servidor=<?= $idServidor ?>"
+            data-servidor-id="<?= $idServidor ?>"
             class="icone-servidor<?= $servidorSelecionado === $idServidor ? ' ativo' : '' ?>"
             title="<?= $nomeServidor ?>"
             aria-label="<?= $nomeServidor ?>"

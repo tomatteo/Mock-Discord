@@ -338,6 +338,133 @@ body {
     color: var(--texto-muted);
 }
 
+.categoria-membros ul {
+    gap: 4px;
+}
+
+.membro-servidor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 5px 8px;
+    color: var(--texto-secundario);
+    font-size: 14px;
+}
+
+.avatar-membro {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #5865F2;
+    color: #FFFFFF;
+}
+
+.membro-servidor > span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.membro-servidor small {
+    margin-left: auto;
+    color: var(--texto-muted);
+    font-size: 11px;
+}
+
+.dialogo-convidar-amigo {
+    width: min(460px, calc(100vw - 32px));
+    max-height: min(620px, calc(100vh - 32px));
+    margin: auto;
+    padding: 24px;
+    overflow-y: auto;
+    border: 1px solid #2B2D31;
+    border-radius: 12px;
+    background-color: #1A1B1E;
+    color: #F2F3F5;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.dialogo-convidar-amigo::backdrop {
+    background-color: rgba(0, 0, 0, 0.78);
+}
+
+.conteudo-dialogo-convidar h2 {
+    margin-bottom: 8px;
+    font-size: 20px;
+}
+
+.conteudo-dialogo-convidar > p {
+    margin-bottom: 16px;
+    color: var(--texto-secundario);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+#lista-amigos-convite {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+    list-style: none;
+}
+
+.amigo-convite {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #2B2D31;
+}
+
+.amigo-convite-identidade {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.amigo-convite-identidade small {
+    color: var(--texto-muted);
+}
+
+.amigo-convite button,
+#fechar-dialogo-convidar {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #5865F2;
+    color: #FFFFFF;
+    cursor: pointer;
+    font: inherit;
+}
+
+.amigo-convite button:disabled {
+    background-color: #404249;
+    color: var(--texto-muted);
+    cursor: not-allowed;
+}
+
+#feedback-convite-servidor {
+    display: block;
+    min-height: 20px;
+    margin-bottom: 8px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+#fechar-dialogo-convidar {
+    display: block;
+    margin-left: auto;
+    background-color: #404249;
+}
+
 .dialogo-canal {
     width: min(440px, calc(100vw - 32px));
     margin: auto;

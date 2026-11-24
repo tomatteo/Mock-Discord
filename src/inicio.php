@@ -2,6 +2,10 @@
 require_once __DIR__ . '/includes/conexao.php';
 require_once __DIR__ . '/includes/autenticacao.php';
 verificarLogin();
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 ?>
 
 <!DOCTYPE html>
@@ -83,14 +87,18 @@ verificarLogin();
     <!-- area principal de amigos (Desktop) -->
     <main class="area-amigos" id="area-amigos">
         <header class="cabecalho-amigos">
+            <button type="button" class="btn-voltar-dms" id="btn-voltar-dms" aria-label="Voltar às mensagens diretas">
+                <i class="bi bi-arrow-left"></i>
+            </button>
             <div class="titulo-amigos">
                 <i class="bi bi-person-raised-hand"></i>
                 <h1>Amigos</h1>
             </div>
             <div class="divisor-vertical"></div>
             <nav class="abas-amigos" aria-label="Filtro de amigos">
-                <button type="button" class="aba-amigo ativa" data-filtro="disponiveis">Disponíveis</button>
-                <button type="button" class="aba-amigo" data-filtro="todos">Todos</button>
+                <button type="button" class="aba-amigo" data-filtro="disponiveis">Disponíveis</button>
+                <button type="button" class="aba-amigo ativa" data-filtro="todos">Todos</button>
+                <button type="button" class="aba-amigo" data-filtro="solicitacoes">Solicitações</button>
                 <button type="button" class="aba-amigo btn-roxo-amigo" data-filtro="adicionar">Adicionar amigo</button>
             </nav>
         </header>
@@ -105,14 +113,19 @@ verificarLogin();
 
                     <h2 class="contador-amigos" id="contador-amigos">ONLINE — 2</h2>
                     <ul class="lista-amigos" id="lista-amigos"></ul>
+                    <section class="secao-solicitacoes" id="secao-solicitacoes" hidden>
+                        <h2>Solicitações pendentes</h2>
+                        <ul class="lista-solicitacoes" id="lista-solicitacoes"></ul>
+                        <p id="vazio-solicitacoes" hidden>Você não tem solicitações pendentes.</p>
+                    </section>
                 </section>
 
                 <section class="conteudo-adicionar-amigo" id="secao-adicionar-amigo">
                     <h2>ADICIONAR AMIGO</h2>
                     <p>Você pode adicionar amigos com o nome de usuário deles no Mock Discord.</p>
 
-                    <form id="form-adicionar-amigo" class="form-add-amigo" novalidate>
-                        <input type="text" id="input-novo-amigo" placeholder="Digite um nome de usuário..." required>
+                    <form id="form-adicionar-amigo" class="form-add-amigo" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>" novalidate>
+                        <input type="text" id="input-novo-amigo" placeholder="Nome, ID ou nome#ID..." maxlength="80" autocomplete="off" required>
                         <button type="submit" class="btn-enviar-pedido">Enviar pedido de amizade</button>
                     </form>
                     <span class="feedback-amigo" id="feedback-amigo" role="status"></span>
@@ -133,6 +146,8 @@ verificarLogin();
 
 <script src="../js/sessao.js"></script>
 <script src="../js/inicio.js"></script>
+<script src="http://<?= htmlspecialchars($vozHost, ENT_QUOTES, 'UTF-8') ?>:3001/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível na porta 3001.')"></script>
+<script src="../js/amigos.js"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/permissoes-servidor.js"></script>
 <script src="../js/criar-servidor.js"></script>

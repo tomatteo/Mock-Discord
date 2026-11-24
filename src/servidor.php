@@ -24,6 +24,18 @@ if (!$servidorAtual) {
     header('Location: inicio.php');
     exit;
 }
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$stmt = $pdo->prepare(
+    'SELECT u.id, u.apelido
+     FROM servidores_usuario su
+     INNER JOIN usuarios u ON u.id = su.id_usuario
+     WHERE su.id_servidor = :servidor
+     ORDER BY u.apelido, u.id'
+);
+$stmt->execute([':servidor' => $idServidor]);
+$membrosServidor = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Carrega os canais de texto e mantém a seleção limitada a este servidor.
 $stmt = $pdo->prepare(
@@ -146,7 +158,33 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
                     </li>
                 </ul>
             </section>
+            <section class="categoria-canal categoria-membros">
+                <div class="cabecalho-categoria">
+                    <span><i class="bi bi-chevron-down"></i> Membros — <?= count($membrosServidor) ?></span>
+                </div>
+                <ul id="lista-membros-servidor" data-servidor-id="<?= (int) $idServidor ?>">
+                    <?php foreach ($membrosServidor as $membro): ?>
+                        <li class="membro-servidor" data-usuario-id="<?= (int) $membro['id'] ?>">
+                            <span class="avatar-membro" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
+                            <span><?= htmlspecialchars($membro['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
+                            <small>#<?= (int) $membro['id'] ?></small>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
         </div>
+        <dialog id="dialogo-convidar-amigo" class="dialogo-convidar-amigo"
+            data-servidor-id="<?= (int) $idServidor ?>"
+            data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+            <div class="conteudo-dialogo-convidar">
+                <h2>Adicionar amigo ao servidor</h2>
+                <p>Escolha alguém da sua lista de amigos. Membros atuais não podem ser adicionados novamente.</p>
+                <ul id="lista-amigos-convite"></ul>
+                <p id="vazio-amigos-convite" hidden>Você ainda não tem amigos para adicionar.</p>
+                <span id="feedback-convite-servidor" role="status"></span>
+                <button type="button" id="fechar-dialogo-convidar">Fechar</button>
+            </div>
+        </dialog>
         <dialog id="dialogo-canal" class="dialogo-canal" aria-labelledby="titulo-dialogo-canal">
             <form id="form-dialogo-canal" novalidate>
                 <h2 id="titulo-dialogo-canal"></h2>
@@ -268,7 +306,11 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 <script src="http://<?= htmlspecialchars($vozHost, ENT_QUOTES, 'UTF-8') ?>:3001/socket.io/socket.io.js" onerror="console.error('Servidor de voz indisponível na porta 3001.')"></script>
 <script>
     const hostVoz = window.location.hostname;
-    const socket = io(`http://${hostVoz}:3001`);
+    const socket = io(`http://${hostVoz}:3001`, { withCredentials: true });
+    window.mockDiscordSocket = socket;
+    socket.on("connect", () => {
+        socket.emit("servidor:entrar", { servidorId: <?= (int) $idServidor ?> });
+    });
     const audioRemotoContainer = document.createElement("div");
     audioRemotoContainer.hidden = true;
     document.body.appendChild(audioRemotoContainer);
@@ -681,6 +723,7 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 <script src="../js/permissoes-servidor.js"></script>
 <script src="../js/canais.js?v=<?= filemtime(__DIR__ . '/js/canais.js') ?>"></script>
 <script src="../js/mensagens.js"></script>
+<script src="../js/amigos.js"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/criar-servidor.js"></script>
 </body>
