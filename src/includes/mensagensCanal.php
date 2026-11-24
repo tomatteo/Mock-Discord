@@ -57,7 +57,7 @@ try {
 
     if ($metodo === 'GET') {
         // O parâmetro "depois" permite buscar somente mensagens ainda não exibidas.
-        $consulta = 'SELECT cm.id, cm.mensagem, cm.data_envio, u.apelido
+        $consulta = 'SELECT cm.id, cm.mensagem, cm.data_envio, u.id AS usuario_id, u.apelido, u.foto_perfil
                      FROM canal_mensagens cm
                      INNER JOIN usuarios u ON u.id = cm.id_usuario
                      WHERE cm.id_canal = :canal';
@@ -78,7 +78,9 @@ try {
         $mensagens = array_map(
             static fn(array $mensagem): array => [
                 'id' => (int) $mensagem['id'],
+                'usuarioId' => (int) $mensagem['usuario_id'],
                 'usuario' => $mensagem['apelido'],
+                'fotoPerfil' => $mensagem['foto_perfil'],
                 'texto' => $mensagem['mensagem'],
                 'enviadoEm' => $mensagem['data_envio']
             ],
@@ -104,7 +106,7 @@ try {
     $idMensagem = (int) $pdo->lastInsertId();
 
     $stmt = $pdo->prepare(
-        'SELECT cm.id, cm.mensagem, cm.data_envio, u.apelido
+        'SELECT cm.id, cm.mensagem, cm.data_envio, u.id AS usuario_id, u.apelido, u.foto_perfil
          FROM canal_mensagens cm
          INNER JOIN usuarios u ON u.id = cm.id_usuario
          WHERE cm.id = :mensagem'
@@ -115,7 +117,9 @@ try {
     responderJson(201, [
         'mensagem' => [
             'id' => (int) $mensagemSalva['id'],
+            'usuarioId' => (int) $mensagemSalva['usuario_id'],
             'usuario' => $mensagemSalva['apelido'],
+            'fotoPerfil' => $mensagemSalva['foto_perfil'],
             'texto' => $mensagemSalva['mensagem'],
             'enviadoEm' => $mensagemSalva['data_envio']
         ]

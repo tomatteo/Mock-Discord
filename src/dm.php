@@ -163,6 +163,7 @@ $nomeAmigoSeguro = htmlspecialchars($amigoAtivo['apelido'], ENT_QUOTES, 'UTF-8')
     <title><?= $nomeAmigoSeguro ?> - Mensagens Diretas - Mock Discord</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style/dm.css">
+    <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
     <link rel="stylesheet" href="../style/configuracoes-popup.css">
     <link rel="stylesheet" href="../style/modal-servidor.css">
     <link rel="stylesheet" href="../style/tipografia.css">
@@ -338,7 +339,9 @@ $nomeAmigoSeguro = htmlspecialchars($amigoAtivo['apelido'], ENT_QUOTES, 'UTF-8')
  
 <script src="../js/sessao.js"></script>
 <script src="/socket.io/socket.io.js" onerror="console.error('Servidor de chamadas indisponível.')"></script>
-<script src="../js/dm.js"></script>
+<script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
+<script src="../js/sons.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/sons.js') ?>"></script>
+<script src="../js/dm.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/dm.js') ?>"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/permissoes-servidor.js"></script>
 <script src="../js/criar-servidor.js"></script>

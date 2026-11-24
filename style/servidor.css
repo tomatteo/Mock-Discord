@@ -955,6 +955,14 @@ button.botao-icone:disabled {
     flex-shrink: 0;
 }
 
+.avatar-mensagem img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .conteudo-mensagem {
     display: flex;
     flex-direction: column;

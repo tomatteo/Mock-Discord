@@ -37,6 +37,24 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # Serviço de tempo real e sinalização de chamadas
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mock-discord-backend
+    environment:
+      PHP_AUTH_URL: http://web/includes/socketAuth.php
+      PORT: 3001
+    volumes:
+      - ./backend/server.js:/app/server.js:ro
+    ports:
+      - "3001:3001"
+    depends_on:
+      web:
+        condition: service_started
+    restart: unless-stopped
+
   # Gerenciador visual do banco
   phpmyadmin:
     image: phpmyadmin:latest

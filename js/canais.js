@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const listaCanaisTexto = document.getElementById("lista-canais-texto");
     const tituloCanalAtivo = document.getElementById("titulo-canal-ativo");
     const servidorId = Number(listaCanaisTexto.dataset.servidorId);
+    const usuarioId = Number(document.querySelector(".layout-aplicativo").dataset.usuarioId);
     let canalIdAtual = Number(listaCanaisTexto.querySelector(".item-canal.ativo")?.dataset.canalId) || null;
     let requisicaoMensagens = 0;
     let maiorIdMensagem = 0;
@@ -51,7 +52,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const avatar = document.createElement("div");
         avatar.className = "avatar-mensagem";
         avatar.setAttribute("aria-hidden", "true");
-        avatar.textContent = Array.from(mensagem.usuario.trim())[0]?.toLocaleUpperCase("pt-BR") || "?";
+        if (mensagem.fotoPerfil) {
+            const imagem = document.createElement("img");
+            imagem.src = mensagem.fotoPerfil;
+            imagem.alt = "";
+            imagem.onerror = () => {
+                imagem.remove();
+                avatar.textContent = Array.from(mensagem.usuario.trim())[0]?.toLocaleUpperCase("pt-BR") || "?";
+            };
+            avatar.appendChild(imagem);
+        } else {
+            avatar.textContent = Array.from(mensagem.usuario.trim())[0]?.toLocaleUpperCase("pt-BR") || "?";
+        }
 
         const conteudo = document.createElement("div");
         conteudo.className = "conteudo-mensagem";
@@ -78,11 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return item;
     }
 
-    function adicionarMensagem(mensagem) {
+    function adicionarMensagem(mensagem, tocarSom = false) {
         if (listaMensagens.querySelector(`[data-mensagem-id="${mensagem.id}"]`)) return;
         document.getElementById("estado-vazio")?.remove();
         listaMensagens.appendChild(criarElementoMensagem(mensagem));
         maiorIdMensagem = Math.max(maiorIdMensagem, Number(mensagem.id));
+        if (tocarSom && Number(mensagem.usuarioId) !== usuarioId) {
+            window.mockDiscordSounds?.tocarMensagem();
+        }
         listaMensagens.scrollTop = listaMensagens.scrollHeight;
     }
 
@@ -149,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (sequencia !== requisicaoMensagens || canalId !== canalIdAtual) return;
 
             erroMensagem.textContent = "";
-            dados.mensagens.forEach(adicionarMensagem);
+            dados.mensagens.forEach((mensagem) => adicionarMensagem(mensagem, true));
         } catch (erro) {
             if (sequencia !== requisicaoMensagens) return;
             console.error("Não foi possível atualizar as mensagens do canal:", erro);

@@ -1,0 +1,15 @@
+.item-dm {
+    position: relative;
+}
+
+.aviso-mensagem-dm {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--fundo-sidebar, #2B2D31);
+    border-radius: 50%;
+    background-color: #F23F43;
+    transform: translateY(-50%);
+}

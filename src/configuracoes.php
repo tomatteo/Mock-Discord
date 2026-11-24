@@ -23,6 +23,7 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações do Usuário - Discord Mock</title>
     <link rel="stylesheet" href="../style/configuracoes.css">
+    <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
     <link rel="stylesheet" href="../style/tipografia.css">
 </head>
 <body class="pagina-config" data-foto-perfil="<?= htmlspecialchars($usuarioPerfil['foto_perfil'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
@@ -229,6 +230,9 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
         </main>
     </div>
 
+    <script src="/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível.')"></script>
+    <script src="../js/sons.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/sons.js') ?>"></script>
+    <script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
     <script src="../js/configuracoes.js"></script>
 </body>
 </html>

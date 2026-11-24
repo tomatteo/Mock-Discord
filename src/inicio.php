@@ -16,7 +16,8 @@ if (!isset($_SESSION['csrf_token'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Discord</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../style/inicio.css">
+    <link rel="stylesheet" href="../style/inicio.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/inicio.css') ?>">
+    <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
     <link rel="stylesheet" href="../style/configuracoes-popup.css">
     <link rel="stylesheet" href="../style/modal-servidor.css">
     <link rel="stylesheet" href="../style/tipografia.css">
@@ -82,7 +83,10 @@ if (!isset($_SESSION['csrf_token'])) {
             <nav class="abas-amigos" aria-label="Filtro de amigos">
                 <button type="button" class="aba-amigo" data-filtro="disponiveis">Disponíveis</button>
                 <button type="button" class="aba-amigo ativa" data-filtro="todos">Todos</button>
-                <button type="button" class="aba-amigo" data-filtro="solicitacoes">Solicitações</button>
+                <button type="button" class="aba-amigo aba-solicitacoes" data-filtro="solicitacoes" aria-label="Solicitações">
+                    Solicitações
+                    <span class="aviso-solicitacoes" id="aviso-solicitacoes" aria-hidden="true" hidden></span>
+                </button>
                 <button type="button" class="aba-amigo btn-roxo-amigo" data-filtro="adicionar">Adicionar amigo</button>
             </nav>
         </header>
@@ -120,8 +124,8 @@ if (!isset($_SESSION['csrf_token'])) {
                 </footer>
             </div>
 
-            <aside class="barra-ativo-agora" aria-label="Amigos ativos em chamada">
-                <h2>Ativo agora</h2>
+            <aside class="barra-ativo-agora" aria-label="Amigos online">
+                <h2>Amigos online</h2>
                 <div class="lista-ativo-agora" id="lista-ativo-agora"></div>
             </aside>
         </div>
@@ -131,7 +135,9 @@ if (!isset($_SESSION['csrf_token'])) {
 <script src="../js/sessao.js"></script>
 <script src="../js/inicio.js"></script>
 <script src="/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível.')"></script>
-<script src="../js/amigos.js"></script>
+<script src="../js/sons.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/sons.js') ?>"></script>
+<script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
+<script src="../js/amigos.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/amigos.js') ?>"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/permissoes-servidor.js"></script>
 <script src="../js/criar-servidor.js"></script>

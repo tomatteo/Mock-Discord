@@ -56,6 +56,8 @@ io.use(async (socket, next) => {
 
 const salasVoz = new Map();
 const chamadasDm = new Map();
+const conexoesPorUsuario = new Map();
+const amigosPorUsuario = new Map();
 const canaisDeVoz = new Set([
     "comunidade-ifc:geral",
     "comunidade-ifc:estudos"
@@ -67,6 +69,12 @@ function salaUsuario(usuarioId) {
 
 function chaveChamada(usuarioId1, usuarioId2) {
     return `${Math.min(usuarioId1, usuarioId2)}:${Math.max(usuarioId1, usuarioId2)}`;
+}
+
+function emitirMudancaPresenca(usuarioId, amigosIds, online) {
+    amigosIds.forEach((amigoId) => {
+        io.to(salaUsuario(amigoId)).emit("presence:changed", { usuarioId, online });
+    });
 }
 
 function enviarEstadoChamada(chamada, estado, extra = {}) {
@@ -119,11 +127,38 @@ function podeEnviarAtualizacao(socket, tipo) {
 
 io.on("connection", (socket) => {
     console.log("Cliente conectado:", socket.id);
-    socket.join(salaUsuario(socket.data.usuario.usuarioId));
+    const usuarioId = socket.data.usuario.usuarioId;
+    socket.join(salaUsuario(usuarioId));
+    const conexoesUsuario = conexoesPorUsuario.get(usuarioId) || new Set();
+    const estavaOffline = conexoesUsuario.size === 0;
+    conexoesUsuario.add(socket.id);
+    conexoesPorUsuario.set(usuarioId, conexoesUsuario);
 
     socket.emit("servidor:pronto", {
         mensagem: "Conexão com o servidor estabelecida."
     });
+
+    async function atualizarPresencaAmigos(enviarSnapshot = false) {
+        try {
+            const usuarioAutorizado = await consultarAutorizacao(socket, { amizades: 1 });
+            if (!usuarioAutorizado || !socket.connected) return;
+            const amigosIds = usuarioAutorizado.amigosIds || [];
+            amigosPorUsuario.set(usuarioId, new Set(amigosIds));
+            if (enviarSnapshot) {
+                socket.emit("presence:snapshot", {
+                    usuarioIds: amigosIds.filter((amigoId) => conexoesPorUsuario.has(amigoId))
+                });
+            }
+            if (estavaOffline && !enviarSnapshot) {
+                emitirMudancaPresenca(usuarioId, amigosIds, true);
+            }
+        } catch (erro) {
+            console.error("Falha ao atualizar presença de amigos:", erro.message);
+        }
+    }
+
+    atualizarPresencaAmigos();
+    socket.on("presence:request", () => atualizarPresencaAmigos(true));
 
     socket.on("amigos:atualizar", async (dados = {}) => {
         if (!podeEnviarAtualizacao(socket, "amigos")) return;
@@ -509,7 +544,13 @@ io.on("connection", (socket) => {
     socket.on("disconnecting", () => sairDaSalaVoz(socket));
 
     socket.on("disconnect", (motivo) => {
-        const usuarioId = socket.data.usuario.usuarioId;
+        const conexoes = conexoesPorUsuario.get(usuarioId);
+        conexoes?.delete(socket.id);
+        if (conexoes?.size === 0) {
+            conexoesPorUsuario.delete(usuarioId);
+            emitirMudancaPresenca(usuarioId, amigosPorUsuario.get(usuarioId) || new Set(), false);
+            amigosPorUsuario.delete(usuarioId);
+        }
         [...chamadasDm.values()]
             .filter((chamada) => chamada.chamadorId === usuarioId || chamada.destinatarioId === usuarioId)
             .forEach((chamada) => encerrarChamada(chamada));

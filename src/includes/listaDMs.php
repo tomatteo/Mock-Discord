@@ -28,7 +28,7 @@ $amigosDM = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php if (!empty($amigoDM['foto_perfil'])): ?>
                         <img src="<?= htmlspecialchars($amigoDM['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
                     <?php endif; ?>
-                    <span class="ponto-status online"></span>
+                    <span class="ponto-status offline" aria-label="Offline"></span>
                 </div>
                 <span class="nome-dm"><?= htmlspecialchars($amigoDM['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
             </a>

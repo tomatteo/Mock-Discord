@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return artigo;
     }
 
-    function inserirMensagem(mensagem) {
+    function inserirMensagem(mensagem, tocarSom = false) {
         const id = Number(mensagem.id);
         if (idsMensagens.has(id)) return;
         const estavaNoFinal = containerMensagens.scrollHeight
@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
         listaMensagens.appendChild(criarMensagem(mensagem));
         idsMensagens.add(id);
         ultimoIdMensagem = Math.max(ultimoIdMensagem, id);
+        if (tocarSom && Number(mensagem.senderId) !== usuarioId) {
+            window.mockDiscordSounds?.tocarMensagem();
+        }
         if (estavaNoFinal) containerMensagens.scrollTop = containerMensagens.scrollHeight;
         filtrarMensagens(inputBuscaDesktop.value || inputBuscaMobile.value);
     }
@@ -112,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch {
                 throw new Error("O servidor retornou uma resposta inválida ao atualizar a conversa.");
             }
-            dados.mensagens.forEach(inserirMensagem);
+            dados.mensagens.forEach((mensagem) => inserirMensagem(mensagem, true));
         } catch (erro) {
             console.error("Não foi possível atualizar as mensagens:", erro);
         }
@@ -262,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function limparChamada() {
+        window.mockDiscordSounds?.pararToqueChamada();
         fluxoChamada = "inativa";
         conexaoP2P?.close();
         conexaoP2P = null;
@@ -336,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dados.chamadorId !== amigoId || fluxoChamada !== "inativa") return;
         fluxoChamada = "recebida";
         atualizarBanner("recebida", `${dados.nomeChamador} está ligando...`);
+        window.mockDiscordSounds?.iniciarToqueChamada();
     });
     socket?.on("dm:call:state", async (dados) => {
         if (![usuarioId, amigoId].includes(dados.chamadorId)
@@ -347,8 +352,10 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (fluxoChamada === "inativa") {
                 fluxoChamada = "recebida";
                 atualizarBanner("recebida", `${dados.nomeChamador} está ligando...`);
+                window.mockDiscordSounds?.iniciarToqueChamada();
             }
         } else if (dados.estado === "ativa") {
+            window.mockDiscordSounds?.pararToqueChamada();
             fluxoChamada = "ativa";
             atualizarBanner("ativa", `Em chamada de voz com ${document.getElementById("nome-amigo-ativo").textContent}`);
             if (dados.chamadorId === usuarioId) {

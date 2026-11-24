@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const listaDms = document.getElementById("lista-dms");
     const listaSolicitacoes = document.getElementById("lista-solicitacoes");
     const vazioSolicitacoes = document.getElementById("vazio-solicitacoes");
+    const avisoSolicitacoes = document.getElementById("aviso-solicitacoes");
+    const abaSolicitacoes = document.querySelector('[data-filtro="solicitacoes"]');
     const formularioAmigo = document.getElementById("form-adicionar-amigo");
     const feedbackAmigo = document.getElementById("feedback-amigo");
     const dialogoConvite = document.getElementById("dialogo-convidar-amigo");
@@ -14,6 +16,62 @@ document.addEventListener("DOMContentLoaded", () => {
     const vazioConvite = document.getElementById("vazio-amigos-convite");
     const feedbackConvite = document.getElementById("feedback-convite-servidor");
     const listaMembros = document.getElementById("lista-membros-servidor");
+    const listaAtivoAgora = document.getElementById("lista-ativo-agora");
+    let amigosConhecidos = [];
+    const usuariosOnline = new Set(window.mockDiscordOnlineIds || []);
+
+    function atualizarStatusAmigos() {
+        amigosConhecidos.forEach((amigo) => {
+            const online = usuariosOnline.has(Number(amigo.id));
+            const itemAmigo = listaAmigos?.querySelector(`.item-amigo[data-usuario-id="${Number(amigo.id)}"]`);
+            if (itemAmigo) itemAmigo.dataset.status = online ? "online" : "offline";
+
+            const pontoStatus = listaDms?.querySelector(`.item-dm[data-amigo="${Number(amigo.id)}"] .ponto-status`);
+            if (pontoStatus) {
+                pontoStatus.className = `ponto-status ${online ? "online" : "offline"}`;
+                pontoStatus.setAttribute("aria-label", online ? "Online" : "Offline");
+            }
+        });
+        renderizarAmigosOnline();
+        window.dispatchEvent(new Event("mock-discord:presence-updated"));
+    }
+
+    function renderizarAmigosOnline() {
+        if (!listaAtivoAgora) return;
+        const online = amigosConhecidos.filter((amigo) => usuariosOnline.has(Number(amigo.id)));
+        listaAtivoAgora.replaceChildren();
+
+        if (online.length === 0) {
+            const vazio = document.createElement("p");
+            vazio.className = "vazio-amigos-online";
+            vazio.textContent = "Nenhum amigo está online agora.";
+            listaAtivoAgora.appendChild(vazio);
+            return;
+        }
+
+        online.forEach((amigo) => {
+            const link = document.createElement("a");
+            link.className = "amigo-online";
+            link.href = `dm.php?amigo=${encodeURIComponent(amigo.id)}`;
+            link.setAttribute("aria-label", `Conversar com ${amigo.apelido}, online`);
+
+            const avatar = criarAvatar("avatar-ativo-agora", amigo.foto_perfil);
+            const ponto = document.createElement("span");
+            ponto.className = "ponto-status online";
+            ponto.setAttribute("aria-hidden", "true");
+            avatar.appendChild(ponto);
+
+            const identidade = document.createElement("span");
+            identidade.className = "info-amigo-ativo";
+            const nome = document.createElement("strong");
+            nome.textContent = amigo.apelido;
+            const status = document.createElement("span");
+            status.textContent = "Online";
+            identidade.append(nome, status);
+            link.append(avatar, identidade);
+            listaAtivoAgora.appendChild(link);
+        });
+    }
 
     async function requisitar(url, opcoes = {}, token = "") {
         const headers = { ...(opcoes.headers || {}) };
@@ -63,13 +121,15 @@ document.addEventListener("DOMContentLoaded", () => {
     async function carregarAmigos() {
         if (!listaAmigos) return;
         const dados = await requisitar("includes/amigos.php");
+        amigosConhecidos = dados.amigos;
         listaAmigos.replaceChildren();
         renderizarListaDms(dados.amigos);
 
         dados.amigos.forEach((amigo) => {
             const item = document.createElement("li");
             item.className = "item-amigo";
-            item.dataset.status = "offline";
+            item.dataset.usuarioId = amigo.id;
+            item.dataset.status = usuariosOnline.has(Number(amigo.id)) ? "online" : "offline";
 
             const informacoes = document.createElement("div");
             informacoes.className = "amigo-info abrir-dm";
@@ -87,6 +147,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (contador) contador.textContent = `AMIGOS — ${dados.amigos.length}`;
 
         listaSolicitacoes?.replaceChildren();
+        if (avisoSolicitacoes) avisoSolicitacoes.hidden = dados.solicitacoes.length === 0;
+        if (abaSolicitacoes) {
+            const quantidade = dados.solicitacoes.length;
+            abaSolicitacoes.setAttribute(
+                "aria-label",
+                quantidade === 0
+                    ? "Solicitações"
+                    : `Solicitações, ${quantidade} ${quantidade === 1 ? "pedido pendente" : "pedidos pendentes"}`
+            );
+        }
         dados.solicitacoes.forEach((solicitacao) => {
             const item = document.createElement("li");
             item.className = "item-amigo";
@@ -133,7 +203,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatar.appendChild(imagem);
             }
             const status = document.createElement("span");
-            status.className = "ponto-status online";
+            const online = usuariosOnline.has(Number(amigo.id));
+            status.className = `ponto-status ${online ? "online" : "offline"}`;
+            status.setAttribute("aria-label", online ? "Online" : "Offline");
             avatar.appendChild(status);
 
             const nome = document.createElement("span");
@@ -150,6 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
             vazio.textContent = "Adicione amigos para começar uma conversa.";
             listaDms.appendChild(vazio);
         }
+        atualizarStatusAmigos();
     }
 
     async function responderSolicitacao(solicitacao, resposta, botao) {
@@ -165,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, formularioAmigo?.dataset.csrfToken || "");
             if (feedbackAmigo) feedbackAmigo.textContent = dados.mensagem;
             socket?.emit("amigos:atualizar", { usuarioId: Number(dados.notificarUsuarioId) });
+            socket?.emit("presence:request");
             await carregarAmigos();
         } catch (erro) {
             botao.disabled = false;
@@ -187,6 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (feedbackAmigo) feedbackAmigo.textContent = dados.mensagem;
             input.value = "";
             socket?.emit("amigos:atualizar", { usuarioId: Number(dados.notificarUsuarioId) });
+            socket?.emit("presence:request");
             await carregarAmigos();
         } catch (erro) {
             if (feedbackAmigo) feedbackAmigo.textContent = erro.message;
@@ -337,6 +412,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (feedbackAmigo) feedbackAmigo.textContent = erro.message;
         });
     });
+    socket?.on("presence:snapshot", (dados = {}) => {
+        usuariosOnline.clear();
+        (dados.usuarioIds || []).forEach((id) => usuariosOnline.add(Number(id)));
+        atualizarStatusAmigos();
+    });
+    socket?.on("presence:changed", (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        if (dados.online) usuariosOnline.add(usuarioId);
+        else usuariosOnline.delete(usuarioId);
+        atualizarStatusAmigos();
+    });
     socket?.on("perfil:atualizado", () => {
         carregarAmigos().catch((erro) => {
             console.error("Não foi possível atualizar as fotos dos amigos:", erro);
@@ -360,6 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket?.on("connect_error", (erro) => {
         console.error("Socket.IO indisponível:", erro.message);
     });
+    socket?.on("connect", () => socket.emit("presence:request"));
 
     carregarAmigos().catch((erro) => {
         if (feedbackAmigo) feedbackAmigo.textContent = erro.message;

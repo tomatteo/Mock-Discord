@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     inputBuscaAmigos.addEventListener("input", aplicarFiltro);
+    window.addEventListener("mock-discord:presence-updated", aplicarFiltro);
     document.getElementById("btn-abrir-add-mobile")?.addEventListener("click", () => {
         document.querySelector(".layout-aplicativo").classList.add("mostrar-amigos");
         document.querySelector('[data-filtro="adicionar"]').click();
