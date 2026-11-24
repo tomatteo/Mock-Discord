@@ -39,7 +39,7 @@ $metodo = $_SERVER['REQUEST_METHOD'];
 try {
     if ($metodo === 'GET') {
         $stmt = $pdo->prepare(
-            'SELECT u.id, u.apelido
+            'SELECT u.id, u.apelido, u.foto_perfil
              FROM amizades a
              INNER JOIN usuarios u
                  ON u.id = IF(a.id_usuario_1 = :usuario_if, a.id_usuario_2, a.id_usuario_1)

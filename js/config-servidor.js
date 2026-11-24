@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bannerPreview = document.getElementById("banner-preview");
 
     const inputIcone = document.getElementById("input-icone-servidor");
+    const removerIcone = document.getElementById("remover-icone-servidor");
     const btnRemoverIcone = document.getElementById("btn-remover-icone");
     const iconePreview = document.getElementById("icone-preview");
     const iconeMobile = document.getElementById("icone-preview-mobile");
@@ -55,6 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
             blocosCor.forEach((b) => b.classList.remove("ativo"));
             bloco.classList.add("ativo");
             bannerPreview.style.backgroundColor = bloco.dataset.cor;
+            document.getElementById("input-cor-servidor").value = bloco.dataset.cor;
+            bloco.setAttribute("aria-pressed", "true");
+            blocosCor.forEach((outroBloco) => {
+                if (outroBloco !== bloco) outroBloco.setAttribute("aria-pressed", "false");
+            });
         });
     });
 
@@ -62,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inputIcone.addEventListener("change", (e) => {
         const arquivo = e.target.files[0];
         if (!arquivo) return;
+        removerIcone.value = "0";
         const leitor = new FileReader();
         leitor.onload = () => aplicarIcone(leitor.result);
         leitor.readAsDataURL(arquivo);
@@ -69,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnRemoverIcone.addEventListener("click", () => {
         inputIcone.value = "";
+        removerIcone.value = "1";
         iconePreview.innerHTML = `<i class="bi bi-images"></i>`;
         iconeMobile.innerHTML = `<i class="bi bi-images"></i>`;
     });

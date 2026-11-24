@@ -63,24 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ======================================================================
     // 2. Carrega dados do usuário logado
     // ======================================================================
-    const usuarioSalvo = JSON.parse(
-        localStorage.getItem("mock_discord_usuario") ||
-        localStorage.getItem("usuarioLogado") ||
-        "null"
-    );
-
-    if (usuarioSalvo) {
-        const nome = usuarioSalvo.username || usuarioSalvo.nome || "";
-        const inicial = nome.charAt(0).toUpperCase();
-        document.getElementById("avatar-inicial").textContent = inicial;
-        document.getElementById("avatar-perfil").textContent = inicial;
-        document.getElementById("nome-usuario-sidebar").textContent = nome;
-        document.getElementById("perfil-username").textContent = nome;
-        document.getElementById("valor-username").textContent = nome;
-        document.getElementById("valor-email").textContent = usuarioSalvo.email || "";
-        document.getElementById("valor-telefone").textContent = usuarioSalvo.telefone || "";
-    }
-
     // ======================================================================
     // 3. Controles de Voz e Áudio (Dispositivos + Sliders salvos no localStorage)
     // ======================================================================
@@ -210,17 +192,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const divAvatarPerfil = document.getElementById("avatar-perfil");
     const divAvatarSidebar = document.getElementById("avatar-inicial");
 
-    function aplicarFotoPerfil(dataUrl) {
-        const temFoto = Boolean(dataUrl);
+    function aplicarFotoPerfil(url) {
+        const temFoto = Boolean(url);
         if (imgAvatarPerfil && divAvatarPerfil) {
-            imgAvatarPerfil.src = dataUrl || "";
+            imgAvatarPerfil.src = url || "";
             imgAvatarPerfil.hidden = !temFoto;
             divAvatarPerfil.hidden = temFoto;
             imgAvatarPerfil.style.display = temFoto ? "block" : "none";
             divAvatarPerfil.style.display = temFoto ? "none" : "flex";
         }
         if (imgAvatarSidebar && divAvatarSidebar) {
-            imgAvatarSidebar.src = dataUrl || "";
+            imgAvatarSidebar.src = url || "";
             imgAvatarSidebar.hidden = !temFoto;
             divAvatarSidebar.hidden = temFoto;
             imgAvatarSidebar.style.display = temFoto ? "block" : "none";
@@ -231,34 +213,67 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    const statusFotoPerfil = document.getElementById("status-foto-perfil");
+    const csrfToken = document.body.dataset.csrfToken;
+    aplicarFotoPerfil(document.body.dataset.fotoPerfil || "");
+
+    async function salvarFotoPerfil(acao, arquivo = null) {
+        const dados = new FormData();
+        dados.set("acao", acao);
+        dados.set("csrf_token", csrfToken);
+        if (arquivo) dados.set("foto", arquivo);
+
+        const resposta = await fetch("includes/perfilFoto.php", {
+            method: "POST",
+            body: dados,
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+        let resultado;
+        try {
+            resultado = await resposta.json();
+        } catch {
+            throw new Error("Não foi possível interpretar a resposta ao salvar a foto. Atualize a página e tente novamente.");
+        }
+        if (!resposta.ok) {
+            throw new Error(resultado.erro || "Não foi possível salvar a foto.");
+        }
+        aplicarFotoPerfil(resultado.url || "");
+        document.body.dataset.fotoPerfil = resultado.url || "";
+        statusFotoPerfil.textContent = acao === "remover"
+            ? "Foto removida."
+            : "Foto de perfil salva.";
+        if (emPopup) {
+            window.parent.postMessage({
+                type: "foto-perfil-atualizada",
+                url: resultado.url || ""
+            }, window.location.origin);
+        }
+    }
+
     if (inputFoto) {
-        inputFoto.addEventListener("change", (evento) => {
+        inputFoto.addEventListener("change", async (evento) => {
             const arquivo = evento.target.files[0];
             if (!arquivo) return;
-
-            const leitor = new FileReader();
-            leitor.onload = (e) => {
-                const imgTemp = new Image();
-                imgTemp.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = 128;
-                    canvas.height = 128;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(imgTemp, 0, 0, 128, 128);
-
-                    const fotoBase64 = canvas.toDataURL("image/jpeg", 0.85);
-                    aplicarFotoPerfil(fotoBase64);
-                };
-                imgTemp.src = e.target.result;
-            };
-            leitor.readAsDataURL(arquivo);
+            statusFotoPerfil.textContent = "Salvando foto...";
+            try {
+                await salvarFotoPerfil("salvar", arquivo);
+            } catch (erro) {
+                statusFotoPerfil.textContent = erro.message;
+            } finally {
+                inputFoto.value = "";
+            }
         });
     }
 
     if (btnRemoverFoto) {
-        btnRemoverFoto.addEventListener("click", () => {
-            if (inputFoto) inputFoto.value = "";
-            aplicarFotoPerfil(null);
+        btnRemoverFoto.addEventListener("click", async () => {
+            statusFotoPerfil.textContent = "Removendo foto...";
+            try {
+                await salvarFotoPerfil("remover");
+            } catch (erro) {
+                statusFotoPerfil.textContent = erro.message;
+            }
         });
     }
 });

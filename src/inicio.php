@@ -2,10 +2,11 @@
 require_once __DIR__ . '/includes/conexao.php';
 require_once __DIR__ . '/includes/autenticacao.php';
 verificarLogin();
+$idUsuarioAtual = (int) $_SESSION['usuario_id'];
+$amigoAtivoId = 0;
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-$vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 ?>
 
 <!DOCTYPE html>
@@ -37,36 +38,20 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
         </header>
 
         <div class="lista-dms-container">
-            <ul class="lista-dms" id="lista-dms">
-                <li>
-                    <a href="dm.php?amigo=amigo1" class="item-dm" data-amigo="amigo1">
-                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
-                        <span class="nome-dm">amigo 1</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="dm.php?amigo=amigo2" class="item-dm" data-amigo="amigo2">
-                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
-                        <span class="nome-dm">amigo 2</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="dm.php?amigo=amigo3" class="item-dm" data-amigo="amigo3">
-                        <div class="avatar-dm"><span class="ponto-status ausente"></span></div>
-                        <span class="nome-dm">amigo 3</span>
-                    </a>
-                </li>
-            </ul>
+            <?php include __DIR__ . '/includes/listaDMs.php'; ?>
         </div>
 
         <!-- painel inferior do usuario -->
         <div class="painel-usuario">
             <div class="info-usuario">
                 <div class="avatar-usuario">
+                    <?php if (!empty($usuarioSidebar['foto_perfil'])): ?>
+                        <img src="<?= htmlspecialchars($usuarioSidebar['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
+                    <?php endif; ?>
                     <span class="ponto-status online"></span>
                 </div>
                 <div class="detalhes-usuario">
-                    <strong data-nome-usuario>Você</strong>
+                    <strong data-nome-usuario><?= htmlspecialchars($usuarioSidebar['apelido'], ENT_QUOTES, 'UTF-8') ?></strong>
                     <span>online</span>
                 </div>
             </div>
@@ -111,7 +96,7 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
                         <i class="bi bi-search"></i>
                     </div>
 
-                    <h2 class="contador-amigos" id="contador-amigos">ONLINE — 2</h2>
+                    <h2 class="contador-amigos" id="contador-amigos">AMIGOS</h2>
                     <ul class="lista-amigos" id="lista-amigos"></ul>
                     <section class="secao-solicitacoes" id="secao-solicitacoes" hidden>
                         <h2>Solicitações pendentes</h2>
@@ -146,7 +131,7 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 
 <script src="../js/sessao.js"></script>
 <script src="../js/inicio.js"></script>
-<script src="http://<?= htmlspecialchars($vozHost, ENT_QUOTES, 'UTF-8') ?>:3001/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível na porta 3001.')"></script>
+<script src="/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível.')"></script>
 <script src="../js/amigos.js"></script>
 <script src="../js/configuracoes-popup.js"></script>
 <script src="../js/permissoes-servidor.js"></script>

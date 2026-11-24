@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['usuario_apelido'] = $usuario['apelido'];
             $_SESSION['usuario_email'] = $usuario['email'];
+            $_SESSION['usuario_foto_perfil'] = $usuario['foto_perfil'] ?? null;
             header("Location: /inicio.php");
             exit;
         } else {

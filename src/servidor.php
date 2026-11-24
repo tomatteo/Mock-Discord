@@ -10,25 +10,42 @@ if (!$idServidor) {
 }
 
 $stmt = $pdo->prepare(
-    'SELECT s.id, s.nome
+    'SELECT s.id, s.nome, s.cor, s.id_dono,
+            EXISTS(
+                SELECT 1
+                FROM servidores_usuario su_admin
+                INNER JOIN servidor_cargos sc ON sc.id = su_admin.id_cargo
+                    AND sc.id_servidor = su_admin.id_servidor
+                WHERE su_admin.id_servidor = s.id
+                    AND su_admin.id_usuario = :usuario_admin
+                    AND sc.adm = TRUE
+            ) AS usuario_administrador
      FROM servidores s
      INNER JOIN servidores_usuario su ON su.id_servidor = s.id
-     WHERE s.id = :servidor AND su.id_usuario = :usuario'
+     WHERE s.id = :servidor AND su.id_usuario = :usuario_membro'
 );
 $stmt->execute([
+    ':usuario_admin' => (int) $_SESSION['usuario_id'],
     ':servidor' => $idServidor,
-    ':usuario' => $_SESSION['usuario_id']
+    ':usuario_membro' => (int) $_SESSION['usuario_id']
 ]);
 $servidorAtual = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$servidorAtual) {
     header('Location: inicio.php');
     exit;
 }
+$podeGerenciarServidor = (int) $servidorAtual['id_dono'] === (int) $_SESSION['usuario_id']
+    || (bool) $servidorAtual['usuario_administrador'];
+$coresServidor = ['#8B8C5B', '#E600FF', '#D3383B', '#C97A16', '#F7F700', '#8A56C2', '#2B72C4', '#14C4A8', '#2E7D1E', '#1A1A1A'];
+$corServidor = strtoupper((string) $servidorAtual['cor']);
+if (!in_array($corServidor, $coresServidor, true)) {
+    $corServidor = '#2B72C4';
+}
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $stmt = $pdo->prepare(
-    'SELECT u.id, u.apelido
+    'SELECT u.id, u.apelido, u.foto_perfil
      FROM servidores_usuario su
      INNER JOIN usuarios u ON u.id = su.id_usuario
      WHERE su.id_servidor = :servidor
@@ -58,7 +75,6 @@ foreach ($canaisTexto as $canalTexto) {
 
 $canalSelecionado ??= $canaisTexto[0] ?? null;
 
-$vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 ?>
 
 
@@ -76,7 +92,7 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 </head>
 <body>
 
-<div class="layout-aplicativo">
+<div class="layout-aplicativo" style="--cor-servidor: <?= htmlspecialchars($corServidor, ENT_QUOTES, 'UTF-8') ?>;">
     <!-- barra lateral servidores -->
     <?php
     include __DIR__ . '/includes/sidebarServidores.php';
@@ -87,9 +103,11 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
         <header class="cabecalho-servidor">
             <h1 class="nome-servidor"><?= htmlspecialchars($servidorAtual['nome'], ENT_QUOTES, 'UTF-8') ?></h1>
             <div class="acoes-cabecalho-servidor">
-                <a href="config-servidor.php" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
-                    <i class="bi bi-chevron-down"></i>
-                </a>
+                <?php if ($podeGerenciarServidor): ?>
+                    <a href="config-servidor.php?servidor=<?= (int) $idServidor ?>" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
+                <?php endif; ?>
                 <button class="botao-icone" id="botao-convidar-servidor" title="Convidar pessoas" aria-label="Convidar pessoas">
                     <i class="bi bi-person-plus-fill"></i>
                 </button>
@@ -165,7 +183,13 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
                 <ul id="lista-membros-servidor" data-servidor-id="<?= (int) $idServidor ?>">
                     <?php foreach ($membrosServidor as $membro): ?>
                         <li class="membro-servidor" data-usuario-id="<?= (int) $membro['id'] ?>">
-                            <span class="avatar-membro" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
+                            <span class="avatar-membro" aria-hidden="true">
+                                <?php if (!empty($membro['foto_perfil'])): ?>
+                                    <img src="<?= htmlspecialchars($membro['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
+                                <?php else: ?>
+                                    <i class="bi bi-person-fill"></i>
+                                <?php endif; ?>
+                            </span>
                             <span><?= htmlspecialchars($membro['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
                             <small>#<?= (int) $membro['id'] ?></small>
                         </li>
@@ -225,10 +249,13 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
             <div class="painel-usuario">
                 <div class="info-usuario">
                     <div class="avatar-circular">
+                       <?php if (!empty($usuarioSidebar['foto_perfil'])): ?>
+                           <img src="<?= htmlspecialchars($usuarioSidebar['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
+                       <?php endif; ?>
                         <span class="indicador-status conectado" title="Online"></span>
                     </div>
                     <div class="detalhes-usuario">
-                        <strong class="nome-usuario" data-nome-usuario><?= htmlspecialchars($_SESSION['usuario_apelido'] ?? 'Você', ENT_QUOTES, 'UTF-8') ?></strong>
+                       <strong class="nome-usuario" data-nome-usuario><?= htmlspecialchars($usuarioSidebar['apelido'], ENT_QUOTES, 'UTF-8') ?></strong>
                         <span class="status-usuario">online</span>
                     </div>
                 </div>
@@ -303,10 +330,9 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
     </main>
 </div>
 
-<script src="http://<?= htmlspecialchars($vozHost, ENT_QUOTES, 'UTF-8') ?>:3001/socket.io/socket.io.js" onerror="console.error('Servidor de voz indisponível na porta 3001.')"></script>
+<script src="/socket.io/socket.io.js" onerror="console.error('Servidor de voz indisponível.')"></script>
 <script>
-    const hostVoz = window.location.hostname;
-    const socket = io(`http://${hostVoz}:3001`, { withCredentials: true });
+    const socket = io({ withCredentials: true });
     window.mockDiscordSocket = socket;
     socket.on("connect", () => {
         socket.emit("servidor:entrar", { servidorId: <?= (int) $idServidor ?> });
@@ -556,7 +582,14 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
             const avatar = document.createElement("span");
             avatar.className = "voz-usuario-avatar";
             avatar.setAttribute("aria-hidden", "true");
-            avatar.textContent = participante.nome.trim().charAt(0).toUpperCase() || "?";
+            if (participante.avatarUrl) {
+                const imagem = document.createElement("img");
+                imagem.src = participante.avatarUrl;
+                imagem.alt = "";
+                avatar.appendChild(imagem);
+            } else {
+                avatar.textContent = participante.nome.trim().charAt(0).toUpperCase() || "?";
+            }
 
             const nome = document.createElement("span");
             nome.className = "voz-usuario-nome";
@@ -608,10 +641,7 @@ $vozHost = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
         }
         renderizarParticipantes(salaVozAtual);
 
-        socket.emit("voz:entrar", {
-            salaId: salaVozAtual,
-            nome: document.querySelector("[data-nome-usuario]")?.textContent.trim() || "Você"
-        });
+        socket.emit("voz:entrar", { salaId: salaVozAtual });
         obterStreamLocal();
     });
 

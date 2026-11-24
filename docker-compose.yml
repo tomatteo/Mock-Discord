@@ -10,9 +10,9 @@ services:
       - "8080:80"
     volumes:
         - ./src:/var/www/html
-        - ./style:/var/www/html/style
-        - ./js:/var/www/html/js
-        - server_icons:/var/www/html/img
+        - ./style:/var/www/assets/style
+        - ./js:/var/www/assets/js
+        - server_icons:/var/www/assets/img
     depends_on:
       db:
         condition: service_healthy

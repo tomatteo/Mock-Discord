@@ -15,6 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $usuarioId = (int) $_SESSION['usuario_id'];
 $idServidor = filter_input(INPUT_GET, 'servidor', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $idUsuario = filter_input(INPUT_GET, 'usuario', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$idAmizade = filter_input(INPUT_GET, 'amizade', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$incluirAmizades = filter_input(INPUT_GET, 'amizades', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === 1;
+$incluirServidores = filter_input(INPUT_GET, 'servidores', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === 1;
 
 if ($idServidor !== null) {
     $stmt = $pdo->prepare(
@@ -60,7 +63,61 @@ if ($idUsuario !== null) {
     }
 }
 
-echo json_encode([
+if ($idAmizade !== null) {
+    $stmt = $pdo->prepare(
+        'SELECT 1
+         FROM amizades
+         WHERE id_usuario_1 = LEAST(:atual_1, :alvo_1)
+           AND id_usuario_2 = GREATEST(:atual_2, :alvo_2)'
+    );
+    $stmt->execute([
+        ':atual_1' => $usuarioId,
+        ':alvo_1' => $idAmizade,
+        ':atual_2' => $usuarioId,
+        ':alvo_2' => $idAmizade
+    ]);
+    if (!$stmt->fetchColumn()) {
+        http_response_code(403);
+        exit;
+    }
+}
+
+$stmt = $pdo->prepare('SELECT apelido, foto_perfil FROM usuarios WHERE id = :usuario');
+$stmt->execute([':usuario' => $usuarioId]);
+$perfil = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$perfil) {
+    http_response_code(401);
+    exit;
+}
+
+$dadosUsuario = [
     'usuarioId' => $usuarioId,
-    'apelido' => $_SESSION['usuario_apelido'] ?? ''
-], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    'apelido' => $perfil['apelido'],
+    'fotoPerfil' => $perfil['foto_perfil']
+];
+
+if ($incluirAmizades) {
+    $stmt = $pdo->prepare(
+        'SELECT IF(a.id_usuario_1 = :usuario_if, a.id_usuario_2, a.id_usuario_1)
+         FROM amizades a
+         WHERE a.id_usuario_1 = :usuario_1 OR a.id_usuario_2 = :usuario_2'
+    );
+    $stmt->execute([
+        ':usuario_if' => $usuarioId,
+        ':usuario_1' => $usuarioId,
+        ':usuario_2' => $usuarioId
+    ]);
+    $dadosUsuario['amigosIds'] = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
+if ($incluirServidores) {
+    $stmt = $pdo->prepare(
+        'SELECT id_servidor
+         FROM servidores_usuario
+         WHERE id_usuario = :usuario'
+    );
+    $stmt->execute([':usuario' => $usuarioId]);
+    $dadosUsuario['servidoresIds'] = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
+echo json_encode($dadosUsuario, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);

@@ -5,6 +5,18 @@ $servidorSelecionado = basename($_SERVER['SCRIPT_NAME']) === 'servidor.php'
 $paginaInicialAtiva = basename($_SERVER['SCRIPT_NAME']) === 'inicio.php';
 
 $stmt = $pdo->prepare(
+    'SELECT apelido, foto_perfil
+     FROM usuarios
+     WHERE id = :usuario'
+);
+$stmt->execute([':usuario' => (int) $_SESSION['usuario_id']]);
+$usuarioSidebar = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$usuarioSidebar) {
+    http_response_code(404);
+    exit('Usuário não encontrado.');
+}
+
+$stmt = $pdo->prepare(
     'SELECT s.id, s.nome, s.icone
      FROM servidores s
      INNER JOIN servidores_usuario su ON su.id_servidor = s.id

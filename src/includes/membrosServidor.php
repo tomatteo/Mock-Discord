@@ -69,7 +69,7 @@ try {
         $amigos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $stmt = $pdo->prepare(
-            'SELECT u.id, u.apelido
+            'SELECT u.id, u.apelido, u.foto_perfil
              FROM servidores_usuario su
              INNER JOIN usuarios u ON u.id = su.id_usuario
              WHERE su.id_servidor = :servidor

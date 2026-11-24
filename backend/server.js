@@ -55,10 +55,38 @@ io.use(async (socket, next) => {
 });
 
 const salasVoz = new Map();
+const chamadasDm = new Map();
 const canaisDeVoz = new Set([
     "comunidade-ifc:geral",
     "comunidade-ifc:estudos"
 ]);
+
+function salaUsuario(usuarioId) {
+    return `usuario:${usuarioId}`;
+}
+
+function chaveChamada(usuarioId1, usuarioId2) {
+    return `${Math.min(usuarioId1, usuarioId2)}:${Math.max(usuarioId1, usuarioId2)}`;
+}
+
+function enviarEstadoChamada(chamada, estado, extra = {}) {
+    const dados = {
+        estado,
+        chamadaId: chamada.chamadaId,
+        chamadorId: chamada.chamadorId,
+        destinatarioId: chamada.destinatarioId,
+        nomeChamador: chamada.nomeChamador,
+        ...extra
+    };
+    [chamada.chamadorId, chamada.destinatarioId].forEach((usuarioId) => {
+        io.to(salaUsuario(usuarioId)).emit("dm:call:state", dados);
+    });
+}
+
+function encerrarChamada(chamada, estado = "encerrada") {
+    chamadasDm.delete(chamada.chamadaId);
+    enviarEstadoChamada(chamada, estado);
+}
 
 function sairDaSalaVoz(socket) {
     const salaId = socket.data.salaVozId;
@@ -91,7 +119,7 @@ function podeEnviarAtualizacao(socket, tipo) {
 
 io.on("connection", (socket) => {
     console.log("Cliente conectado:", socket.id);
-    socket.join(`usuario:${socket.data.usuario.usuarioId}`);
+    socket.join(salaUsuario(socket.data.usuario.usuarioId));
 
     socket.emit("servidor:pronto", {
         mensagem: "Conexão com o servidor estabelecida."
@@ -171,12 +199,212 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("voz:entrar", (dados = {}) => {
-        const salaId = typeof dados.salaId === "string" ? dados.salaId.trim() : "";
-        const nome = typeof dados.nome === "string" ? dados.nome.trim() : "";
+    socket.on("perfil:atualizado", async () => {
+        try {
+            const usuarioAtualizado = await consultarAutorizacao(socket, { amizades: 1, servidores: 1 });
+            if (!usuarioAtualizado) return;
+            socket.data.usuario = usuarioAtualizado;
 
-        if (!canaisDeVoz.has(salaId) || !nome) {
-            socket.emit("voz:erro", { mensagem: "Sala ou nome inválido." });
+            const salaId = socket.data.salaVozId;
+            const participante = salasVoz.get(salaId)?.get(socket.id);
+            if (participante) {
+                participante.nome = String(usuarioAtualizado.apelido || participante.nome).slice(0, 40);
+                participante.avatarUrl = usuarioAtualizado.fotoPerfil || null;
+                io.to(salaId).emit("voz:participante-estado", { salaId, participante });
+            }
+
+            (usuarioAtualizado.amigosIds || []).forEach((amigoId) => {
+                io.to(salaUsuario(amigoId)).emit("perfil:atualizado", {
+                    usuarioId: usuarioAtualizado.usuarioId,
+                    apelido: usuarioAtualizado.apelido,
+                    avatarUrl: usuarioAtualizado.fotoPerfil
+                });
+            });
+            (usuarioAtualizado.servidoresIds || []).forEach((servidorId) => {
+                io.to(`servidor:${servidorId}`).emit("perfil:atualizado", {
+                    usuarioId: usuarioAtualizado.usuarioId,
+                    apelido: usuarioAtualizado.apelido,
+                    avatarUrl: usuarioAtualizado.fotoPerfil
+                });
+            });
+        } catch (erro) {
+            console.error("Falha ao atualizar foto de perfil em tempo real:", erro.message);
+        }
+    });
+
+    socket.on("dm:call:status", async (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        if (!Number.isSafeInteger(usuarioId) || usuarioId < 1 || usuarioId === atualId) return;
+
+        try {
+            const autorizado = await consultarAutorizacao(socket, { amizade: usuarioId });
+            if (!autorizado) return;
+            const chamada = chamadasDm.get(chaveChamada(atualId, usuarioId));
+            if (chamada) {
+                socket.emit("dm:call:state", {
+                    estado: chamada.estado,
+                    chamadaId: chamada.chamadaId,
+                    chamadorId: chamada.chamadorId,
+                    destinatarioId: chamada.destinatarioId,
+                    nomeChamador: chamada.nomeChamador
+                });
+            }
+        } catch (erro) {
+            console.error("Falha ao consultar estado da chamada privada:", erro.message);
+        }
+    });
+
+    socket.on("dm:call:available", async (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        if (!Number.isSafeInteger(usuarioId) || usuarioId < 1 || usuarioId === atualId) return;
+
+        try {
+            const autorizado = await consultarAutorizacao(socket, { amizade: usuarioId });
+            if (autorizado) {
+                socket.join(`dm:${chaveChamada(atualId, usuarioId)}`);
+                socket.emit("dm:call:ready", { usuarioId });
+            }
+        } catch (erro) {
+            console.error("Falha ao validar a conversa privada para chamadas:", erro.message);
+        }
+    });
+
+    socket.on("dm:call:invite", async (dados = {}) => {
+        if (!podeEnviarAtualizacao(socket, "dm-call")) return;
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        if (!Number.isSafeInteger(usuarioId) || usuarioId < 1 || usuarioId === atualId) return;
+
+        try {
+            const autorizado = await consultarAutorizacao(socket, { amizade: usuarioId });
+            if (!autorizado) {
+                socket.emit("dm:call:error", { mensagem: "A chamada só pode ser iniciada com um amigo." });
+                return;
+            }
+            const chamadaId = chaveChamada(atualId, usuarioId);
+            if (!io.sockets.adapter.rooms.get(`dm:${chamadaId}`)?.size) {
+                socket.emit("dm:call:error", { mensagem: "Seu amigo precisa abrir esta conversa para receber a chamada." });
+                return;
+            }
+            if ([...chamadasDm.values()].some((chamada) =>
+                chamada.chamadorId === atualId
+                || chamada.destinatarioId === atualId
+                || chamada.chamadorId === usuarioId
+                || chamada.destinatarioId === usuarioId
+            )) {
+                socket.emit("dm:call:error", { mensagem: "Uma das contas já está em outra chamada." });
+                return;
+            }
+
+            const chamada = {
+                chamadaId,
+                estado: "tocando",
+                chamadorId: atualId,
+                destinatarioId: usuarioId,
+                nomeChamador: String(socket.data.usuario.apelido || "Amigo").slice(0, 40)
+            };
+            chamadasDm.set(chamadaId, chamada);
+            io.to(`dm:${chamadaId}`).emit("dm:call:incoming", {
+                chamadaId,
+                chamadorId: atualId,
+                nomeChamador: chamada.nomeChamador
+            });
+            enviarEstadoChamada(chamada, "tocando");
+        } catch (erro) {
+            console.error("Falha ao iniciar chamada privada:", erro.message);
+            socket.emit("dm:call:error", { mensagem: "Não foi possível iniciar a chamada." });
+        }
+    });
+
+    socket.on("dm:call:accept", (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        const chamada = Number.isSafeInteger(usuarioId)
+            ? chamadasDm.get(chaveChamada(atualId, usuarioId))
+            : null;
+        if (!chamada || chamada.estado !== "tocando" || chamada.destinatarioId !== atualId) return;
+        chamada.estado = "ativa";
+        enviarEstadoChamada(chamada, "ativa");
+    });
+
+    socket.on("dm:call:reject", (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        const chamada = Number.isSafeInteger(usuarioId)
+            ? chamadasDm.get(chaveChamada(atualId, usuarioId))
+            : null;
+        if (!chamada || chamada.destinatarioId !== atualId) return;
+        encerrarChamada(chamada, "recusada");
+    });
+
+    socket.on("dm:call:end", (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        const chamada = Number.isSafeInteger(usuarioId)
+            ? chamadasDm.get(chaveChamada(atualId, usuarioId))
+            : null;
+        if (!chamada || (chamada.chamadorId !== atualId && chamada.destinatarioId !== atualId)) return;
+        encerrarChamada(chamada);
+    });
+
+    socket.on("dm:call:signal", (dados = {}) => {
+        const usuarioId = Number(dados.usuarioId);
+        const atualId = socket.data.usuario.usuarioId;
+        const chamada = Number.isSafeInteger(usuarioId)
+            ? chamadasDm.get(chaveChamada(atualId, usuarioId))
+            : null;
+        if (
+            !chamada
+            || chamada.estado !== "ativa"
+            || ![chamada.chamadorId, chamada.destinatarioId].includes(atualId)
+            || ![chamada.chamadorId, chamada.destinatarioId].includes(usuarioId)
+            || usuarioId === atualId
+        ) return;
+
+        if (
+            dados.descricao
+            && ["offer", "answer"].includes(dados.descricao.type)
+            && typeof dados.descricao.sdp === "string"
+            && dados.descricao.sdp.length <= 100000
+        ) {
+            io.to(salaUsuario(usuarioId)).emit("dm:call:signal", {
+                origemId: atualId,
+                descricao: dados.descricao
+            });
+            return;
+        }
+        if (
+            dados.candidato
+            && typeof dados.candidato.candidate === "string"
+            && dados.candidato.candidate.length <= 2048
+        ) {
+            io.to(salaUsuario(usuarioId)).emit("dm:call:signal", {
+                origemId: atualId,
+                candidato: dados.candidato
+            });
+        }
+    });
+
+    socket.on("voz:entrar", async (dados = {}) => {
+        const salaId = typeof dados.salaId === "string" ? dados.salaId.trim() : "";
+
+        if (!canaisDeVoz.has(salaId)) {
+            socket.emit("voz:erro", { mensagem: "Canal de voz inválido." });
+            return;
+        }
+
+        try {
+            const usuarioAtualizado = await consultarAutorizacao(socket);
+            if (!usuarioAtualizado) {
+                socket.emit("voz:erro", { mensagem: "Sua sessão expirou. Entre novamente." });
+                return;
+            }
+            socket.data.usuario = usuarioAtualizado;
+        } catch (erro) {
+            console.error("Falha ao carregar o perfil para o canal de voz:", erro.message);
+            socket.emit("voz:erro", { mensagem: "Não foi possível carregar seu perfil para a chamada." });
             return;
         }
 
@@ -190,7 +418,9 @@ io.on("connection", (socket) => {
 
         const participante = {
             socketId: socket.id,
-            nome: nome.slice(0, 40),
+            usuarioId: socket.data.usuario.usuarioId,
+            nome: String(socket.data.usuario.apelido || "Usuário").slice(0, 40),
+            avatarUrl: socket.data.usuario.fotoPerfil || null,
             mutado: false,
             ensurdecido: false
         };
@@ -279,6 +509,10 @@ io.on("connection", (socket) => {
     socket.on("disconnecting", () => sairDaSalaVoz(socket));
 
     socket.on("disconnect", (motivo) => {
+        const usuarioId = socket.data.usuario.usuarioId;
+        [...chamadasDm.values()]
+            .filter((chamada) => chamada.chamadorId === usuarioId || chamada.destinatarioId === usuarioId)
+            .forEach((chamada) => encerrarChamada(chamada));
         console.log("Cliente desconectado:", socket.id, motivo);
     });
 });
@@ -288,4 +522,3 @@ const porta = process.env.PORT || 3001;
 httpServer.listen(porta, () => {
     console.log(`Servidor disponível em http://localhost:${porta}`);
 });
-

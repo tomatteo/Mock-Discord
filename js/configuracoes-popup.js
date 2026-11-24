@@ -68,13 +68,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("message", (evento) => {
-        if (!quadroConfiguracoes || evento.source !== quadroConfiguracoes.contentWindow) return;
+        if (
+            !quadroConfiguracoes
+            || evento.source !== quadroConfiguracoes.contentWindow
+            || evento.origin !== window.location.origin
+        ) return;
 
         if (evento.data === "fechar-configuracoes") {
             fecharPopup();
         } else if (evento.data === "sair-configuracoes") {
             fecharPopup();
             window.location.href = "../index.php";
+        } else if (
+            evento.data?.type === "foto-perfil-atualizada"
+            && (evento.data.url === "" || /^\/img\/avatars\/[0-9]+-[a-f0-9]{12}\.(?:jpg|png|webp)(?:\?v=[0-9]+)?$/.test(evento.data.url))
+        ) {
+            document.querySelectorAll(".avatar-usuario, .avatar-circular").forEach((avatar) => {
+                avatar.querySelector("img")?.remove();
+                if (evento.data.url) {
+                    const imagem = document.createElement("img");
+                    imagem.src = evento.data.url;
+                    imagem.alt = "";
+                    avatar.prepend(imagem);
+                }
+            });
+            window.mockDiscordSocket?.emit("perfil:atualizado");
         }
     });
 });

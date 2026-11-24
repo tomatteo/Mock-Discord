@@ -1,3 +1,21 @@
+<?php
+require_once __DIR__ . '/includes/conexao.php';
+require_once __DIR__ . '/includes/autenticacao.php';
+verificarLogin();
+
+$stmt = $pdo->prepare('SELECT apelido, email, numero, foto_perfil FROM usuarios WHERE id = :usuario');
+$stmt->execute([':usuario' => (int) $_SESSION['usuario_id']]);
+$usuarioPerfil = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$usuarioPerfil) {
+    http_response_code(404);
+    exit('Usuário não encontrado.');
+}
+
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-8'), 'UTF-8');
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,7 +25,7 @@
     <link rel="stylesheet" href="../style/configuracoes.css">
     <link rel="stylesheet" href="../style/tipografia.css">
 </head>
-<body class="pagina-config">
+<body class="pagina-config" data-foto-perfil="<?= htmlspecialchars($usuarioPerfil['foto_perfil'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Overlay / Modal principal de Configurações -->
     <div id="layout-config" class="config-layout">
@@ -15,7 +33,7 @@
         <!-- Barra Lateral de Navegação (Menu de Opções) -->
         <aside class="config-sidebar" aria-label="Menu de configurações">
             <header class="usuario-resumo">
-                <div class="avatar-usuario" id="avatar-inicial" aria-hidden="true">F</div>
+                <div class="avatar-usuario" id="avatar-inicial" aria-hidden="true"><?= htmlspecialchars($inicialUsuario, ENT_QUOTES, 'UTF-8') ?></div>
                 <img id="img-avatar-sidebar" class="avatar-img-pequeno" src="" alt="Avatar do usuário logado" hidden>
                 <span class="nome-usuario" id="nome-usuario-sidebar">Nome Usuário</span>
                 <a href="inicio.php" class="btn-fechar-mobile-lista" aria-label="Fechar configurações">✕</a>
@@ -63,7 +81,7 @@
                 <article class="card-perfil">
                     <div class="perfil-topo">
                         <div class="avatar-container">
-                            <div class="avatar-grande" id="avatar-perfil">F</div>
+                            <div class="avatar-grande" id="avatar-perfil"><?= htmlspecialchars($inicialUsuario, ENT_QUOTES, 'UTF-8') ?></div>
                             <img id="img-avatar-perfil" class="avatar-img-grande" src="" alt="Foto de perfil do usuário" hidden>
                         </div>
                         <div class="perfil-info-acoes">
@@ -71,24 +89,25 @@
                             <p class="texto-suave">Status: Online</p>
                             <div class="botoes-foto">
                                 <label for="input-foto-perfil" class="btn-primario btn-pequeno">Alterar Foto</label>
-                                <input type="file" id="input-foto-perfil" accept="image/*" hidden>
+                                <input type="file" id="input-foto-perfil" accept="image/jpeg,image/png,image/webp" hidden>
                                 <button type="button" id="btn-remover-foto" class="btn-secundario btn-pequeno" hidden>Remover</button>
                             </div>
+                            <p id="status-foto-perfil" class="texto-status-mic" role="status" aria-live="polite"></p>
                         </div>
                     </div>
 
                     <div class="lista-dados-conta">
                         <div class="dado-item">
                             <span class="dado-label">Nome de Usuário</span>
-                            <span class="dado-valor" id="valor-username">Filipe</span>
+                            <span class="dado-valor" id="valor-username"><?= htmlspecialchars($usuarioPerfil['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                         <div class="dado-item">
                             <span class="dado-label">E-mail</span>
-                            <span class="dado-valor" id="valor-email">filipe@discord.mock</span>
+                            <span class="dado-valor" id="valor-email"><?= htmlspecialchars($usuarioPerfil['email'], ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                         <div class="dado-item">
                             <span class="dado-label">Telefone</span>
-                            <span class="dado-valor" id="valor-telefone">(49) 99999-0001</span>
+                            <span class="dado-valor" id="valor-telefone"><?= htmlspecialchars($usuarioPerfil['numero'], ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                     </div>
                 </article>

@@ -40,7 +40,7 @@ if ($arquivo && $arquivo['error'] !== UPLOAD_ERR_NO_FILE) {
         exit('O ícone deve estar no formato JPG, PNG ou WEBP.');
     }
 
-    $diretorioImagens = __DIR__ . '/../img';
+    $diretorioImagens = getenv('SERVER_ICONS_DIR') ?: __DIR__ . '/../img';
     if (!is_dir($diretorioImagens) && !mkdir($diretorioImagens, 0775, true) && !is_dir($diretorioImagens)) {
         throw new RuntimeException('Não foi possível preparar o diretório de ícones.');
     }

@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const urlSocket = `${window.location.protocol}//${window.location.hostname}:3001`;
     const socket = window.mockDiscordSocket
-        || (typeof window.io === "function" ? window.io(urlSocket, { withCredentials: true }) : null);
+        || (typeof window.io === "function" ? window.io({ withCredentials: true }) : null);
     if (socket) window.mockDiscordSocket = socket;
 
     const listaAmigos = document.getElementById("lista-amigos");
+    const listaDms = document.getElementById("lista-dms");
     const listaSolicitacoes = document.getElementById("lista-solicitacoes");
     const vazioSolicitacoes = document.getElementById("vazio-solicitacoes");
     const formularioAmigo = document.getElementById("form-adicionar-amigo");
@@ -47,10 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return identidade;
     }
 
-    function criarAvatar(classe = "avatar-amigo") {
+    function criarAvatar(classe = "avatar-amigo", url = "") {
         const avatar = document.createElement("span");
         avatar.className = classe;
         avatar.setAttribute("aria-hidden", "true");
+        if (url) {
+            const imagem = document.createElement("img");
+            imagem.src = url;
+            imagem.alt = "";
+            avatar.appendChild(imagem);
+        }
         return avatar;
     }
 
@@ -58,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!listaAmigos) return;
         const dados = await requisitar("includes/amigos.php");
         listaAmigos.replaceChildren();
+        renderizarListaDms(dados.amigos);
 
         dados.amigos.forEach((amigo) => {
             const item = document.createElement("li");
@@ -65,9 +72,14 @@ document.addEventListener("DOMContentLoaded", () => {
             item.dataset.status = "offline";
 
             const informacoes = document.createElement("div");
-            informacoes.className = "amigo-info";
-            informacoes.append(criarAvatar(), criarIdentidade(amigo.apelido, amigo.id));
-            item.appendChild(informacoes);
+            informacoes.className = "amigo-info abrir-dm";
+            const abrirConversa = document.createElement("a");
+            abrirConversa.className = "amigo-info-link";
+            abrirConversa.href = `dm.php?amigo=${encodeURIComponent(amigo.id)}`;
+            abrirConversa.setAttribute("aria-label", `Conversar com ${amigo.apelido}`);
+            informacoes.append(criarAvatar("avatar-amigo", amigo.foto_perfil), criarIdentidade(amigo.apelido, amigo.id));
+            while (informacoes.firstChild) abrirConversa.appendChild(informacoes.firstChild);
+            item.appendChild(abrirConversa);
             listaAmigos.appendChild(item);
         });
 
@@ -98,6 +110,46 @@ document.addEventListener("DOMContentLoaded", () => {
             listaSolicitacoes?.appendChild(item);
         });
         if (vazioSolicitacoes) vazioSolicitacoes.hidden = dados.solicitacoes.length !== 0;
+    }
+
+    function renderizarListaDms(amigos) {
+        if (!listaDms) return;
+        const amigoAtivo = new URLSearchParams(window.location.search).get("amigo");
+        listaDms.replaceChildren();
+
+        amigos.forEach((amigo) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.className = `item-dm${String(amigo.id) === amigoAtivo ? " ativo" : ""}`;
+            link.href = `dm.php?amigo=${encodeURIComponent(amigo.id)}`;
+            link.dataset.amigo = amigo.id;
+
+            const avatar = document.createElement("span");
+            avatar.className = "avatar-dm";
+            if (amigo.foto_perfil) {
+                const imagem = document.createElement("img");
+                imagem.src = amigo.foto_perfil;
+                imagem.alt = "";
+                avatar.appendChild(imagem);
+            }
+            const status = document.createElement("span");
+            status.className = "ponto-status online";
+            avatar.appendChild(status);
+
+            const nome = document.createElement("span");
+            nome.className = "nome-dm";
+            nome.textContent = amigo.apelido;
+            link.append(avatar, nome);
+            item.appendChild(link);
+            listaDms.appendChild(item);
+        });
+
+        if (amigos.length === 0) {
+            const vazio = document.createElement("li");
+            vazio.className = "lista-dms-vazia";
+            vazio.textContent = "Adicione amigos para começar uma conversa.";
+            listaDms.appendChild(vazio);
+        }
     }
 
     async function responderSolicitacao(solicitacao, resposta, botao) {
@@ -154,9 +206,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const avatar = document.createElement("span");
             avatar.className = "avatar-membro";
             avatar.setAttribute("aria-hidden", "true");
-            const icone = document.createElement("i");
-            icone.className = "bi bi-person-fill";
-            avatar.appendChild(icone);
+            if (membro.foto_perfil) {
+                const imagem = document.createElement("img");
+                imagem.src = membro.foto_perfil;
+                imagem.alt = "";
+                avatar.appendChild(imagem);
+            } else {
+                const icone = document.createElement("i");
+                icone.className = "bi bi-person-fill";
+                avatar.appendChild(icone);
+            }
 
             const nome = document.createElement("span");
             nome.textContent = membro.apelido;
@@ -276,6 +335,14 @@ document.addEventListener("DOMContentLoaded", () => {
     socket?.on("amigos:atualizados", () => {
         carregarAmigos().catch((erro) => {
             if (feedbackAmigo) feedbackAmigo.textContent = erro.message;
+        });
+    });
+    socket?.on("perfil:atualizado", () => {
+        carregarAmigos().catch((erro) => {
+            console.error("Não foi possível atualizar as fotos dos amigos:", erro);
+        });
+        carregarMembrosServidor().catch((erro) => {
+            console.error("Não foi possível atualizar as fotos dos membros:", erro);
         });
     });
     socket?.on("servidor:membros-atualizados", (dados) => {

@@ -190,6 +190,21 @@ body {
     height: 34px;
 }
 
+.avatar-dm img,
+.avatar-amigo img,
+.avatar-usuario img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-usuario img {
+    position: absolute;
+    inset: 0;
+}
+
 .ponto-status {
     width: 10px;
     height: 10px;
@@ -668,6 +683,18 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.amigo-info-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.amigo-info-link:hover .amigo-texto strong {
+    text-decoration: underline;
 }
 
 .avatar-amigo {

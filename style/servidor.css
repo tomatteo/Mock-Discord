@@ -95,6 +95,10 @@ body {
     background-color: var(--cor-primaria);
 }
 
+.icone-servidor:not(.icone-inicio).ativo {
+    background-color: var(--cor-servidor, var(--cor-primaria));
+}
+
 .icone-inicio {
     background-color: var(--fundo-principal);
     border-radius: 50%;
@@ -300,6 +304,7 @@ body {
 }
 
 .voz-usuario-avatar img {
+    display: block;
     width: 100%;
     height: 100%;
     border-radius: 50%;
@@ -362,6 +367,14 @@ body {
     border-radius: 50%;
     background-color: #5865F2;
     color: #FFFFFF;
+}
+
+.avatar-membro img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .membro-servidor > span:nth-child(2) {
@@ -690,6 +703,14 @@ body {
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
+}
+
+.avatar-circular img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .info-usuario {
