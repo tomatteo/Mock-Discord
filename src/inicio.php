@@ -31,28 +31,8 @@ verificarLogin();
                 <i class="bi bi-plus-lg"></i>
             </button>
         </header>
-
         <div class="lista-dms-container">
-            <ul class="lista-dms" id="lista-dms">
-                <li>
-                    <a href="dm.php?amigo=amigo1" class="item-dm" data-amigo="amigo1">
-                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
-                        <span class="nome-dm">amigo 1</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="dm.php?amigo=amigo2" class="item-dm" data-amigo="amigo2">
-                        <div class="avatar-dm"><span class="ponto-status online"></span></div>
-                        <span class="nome-dm">amigo 2</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="dm.php?amigo=amigo3" class="item-dm" data-amigo="amigo3">
-                        <div class="avatar-dm"><span class="ponto-status ausente"></span></div>
-                        <span class="nome-dm">amigo 3</span>
-                    </a>
-                </li>
-            </ul>
+            <?php include __DIR__ . '/includes/listaDMs.php'; ?>
         </div>
 
         <!-- painel inferior do usuario -->
