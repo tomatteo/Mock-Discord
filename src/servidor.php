@@ -103,11 +103,17 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
         <header class="cabecalho-servidor">
             <h1 class="nome-servidor"><?= htmlspecialchars($servidorAtual['nome'], ENT_QUOTES, 'UTF-8') ?></h1>
             <div class="acoes-cabecalho-servidor">
+<<<<<<< HEAD
                 <?php if ($podeGerenciarServidor): ?>
                     <a href="config-servidor.php?servidor=<?= (int) $idServidor ?>" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
                         <i class="bi bi-chevron-down"></i>
                     </a>
                 <?php endif; ?>
+=======
+                <a href="config-servidor.php?servidor=<?= (int) $idServidor ?>" class="botao-icone" id="link-config-servidor" title="Configurações do servidor" aria-label="Configurações do servidor">
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+>>>>>>> origin/main
                 <button class="botao-icone" id="botao-convidar-servidor" title="Convidar pessoas" aria-label="Convidar pessoas">
                     <i class="bi bi-person-plus-fill"></i>
                 </button>

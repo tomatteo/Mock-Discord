@@ -22,6 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formPerfil = document.getElementById("form-perfil-servidor");
 
+    const servidorId = new URLSearchParams(window.location.search).get("servidor");
+    if (servidorId) {
+        const urlServidor = new URL("servidor.php", window.location.href);
+        urlServidor.searchParams.set("servidor", servidorId);
+        document.querySelectorAll('a[href="servidor.php"]').forEach((link) => {
+            link.href = urlServidor.href;
+        });
+    }
+
     function atualizarNomes(novoNome) {
         const texto = novoNome.trim() || "Nome do servidor";
         nomePreview.textContent = texto;

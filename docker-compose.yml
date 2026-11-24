@@ -18,19 +18,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # API e eventos em tempo real
-  backend:
-    build: ./backend
-    container_name: mock-discord-backend
-    ports:
-      - "3001:3001"
-    environment:
-      PORT: 3001
-      PHP_AUTH_URL: http://web/includes/socketAuth.php
-    depends_on:
-      - web
-    restart: unless-stopped
-
   # Banco de dados MySQL
   db:
     image: mysql:8.4
