@@ -75,3 +75,9 @@
 ### Prompt - Retire toda a logica de dados do javascript, para ele não cadastrar nada e também não utilizar os dados ficticios dele
 - **Ferramenta Utilizada: ** Claude
 - **Arquivos envolvidos: **  `auth.js`,`canais.js`,`config-servidor.js`,`configuracoes-popup.js`,`criar-servidor.js`,`dm.js`, `inicio.ja`,`mensagens.js`,`sassao.js`,`configuracoes.js`
+
+### Prompt — Correção do Logout nas Configurações
+- **Ferramenta utilizada:** GitHub Copilot no VS Code
+- **Arquivos envolvidos:** `src/configuracoes.php`, `src/sair.php`, `js/configuracoes.js`
+- **Prompt utilizado:** *"Corrija a opção Sair da Conta nas configurações para encerrar a sessão de forma segura e redirecionar o usuário para a tela de login."*
+- **Como a resposta foi aproveitada e ajustada:** O logout passou a ser enviado por `POST` com validação de token CSRF. Após validar a solicitação, o servidor limpa os dados da sessão, remove o cookie e redireciona para a tela de login. Quando as configurações estão abertas em um popup, o JavaScript envia o formulário e fecha o popup após a sessão ser encerrada.
