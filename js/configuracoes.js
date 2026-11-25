@@ -9,10 +9,42 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".btn-fechar-desktop, .btn-fechar-mobile-lista").forEach((botao) => {
             botao.addEventListener("click", (evento) => {
                 evento.preventDefault();
-                window.parent.postMessage("fechar-configuracoes", "*");
+                window.parent.postMessage("fechar-configuracoes", window.location.origin);
             });
         });
     }
+
+    document.querySelector(".sidebar-acoes-extra form")?.addEventListener("submit", async (evento) => {
+        if (!emPopup) return;
+        evento.preventDefault();
+        const formulario = evento.currentTarget;
+        const botaoSair = formulario.querySelector('[type="submit"]');
+        botaoSair.disabled = true;
+        botaoSair.textContent = "Saindo...";
+        try {
+            const resposta = await fetch(formulario.action, {
+                method: "POST",
+                body: new FormData(formulario),
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+            if (!resposta.ok) {
+                throw new Error("Não foi possível encerrar a sessão. Tente novamente.");
+            }
+            window.parent.postMessage("sair-configuracoes", window.location.origin);
+        } catch (erro) {
+            botaoSair.disabled = false;
+            botaoSair.textContent = "Sair da Conta";
+            let mensagem = formulario.nextElementSibling;
+            if (!mensagem || !mensagem.matches('[role="alert"]')) {
+                mensagem = document.createElement("p");
+                mensagem.className = "texto-status-mic";
+                mensagem.setAttribute("role", "alert");
+                formulario.after(mensagem);
+            }
+            mensagem.textContent = erro.message;
+        }
+    });
 
     const layout = document.getElementById("layout-config");
     const abasNav = document.querySelectorAll(".aba-nav");

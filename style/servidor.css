@@ -37,6 +37,62 @@ body {
     grid-template-columns: var(--largura-rail-servidores) 240px 1fr;
     height: 100vh;
     width: 100vw;
+    position: relative;
+}
+
+.layout-aplicativo.membros-abertos {
+    grid-template-columns: var(--largura-rail-servidores) 240px minmax(0, 1fr) 240px;
+}
+
+.painel-membros-servidor {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--fundo-sidebar);
+}
+
+.painel-membros-servidor[hidden] {
+    display: none;
+}
+
+.cabecalho-membros-servidor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 0 12px 0 16px;
+    border-bottom: 1px solid var(--borda-sutil);
+    color: var(--texto-muted);
+}
+
+.cabecalho-membros-servidor h2 {
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cabecalho-membros-servidor .botao-icone {
+    flex: 0 0 32px;
+}
+
+#lista-membros-servidor {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 8px;
+    list-style: none;
+}
+
+.grupo-membros-titulo {
+    padding: 8px 8px 4px;
+    color: var(--texto-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 /* 1. Rail de Servidores */
@@ -343,21 +399,25 @@ body {
     color: var(--texto-muted);
 }
 
-.categoria-membros ul {
-    gap: 4px;
-}
-
 .membro-servidor {
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
     padding: 5px 8px;
+    border-radius: 4px;
     color: var(--texto-secundario);
     font-size: 14px;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.membro-servidor:hover {
+    background-color: var(--fundo-hover);
+    color: var(--texto-claro);
 }
 
 .avatar-membro {
+    position: relative;
     display: inline-flex;
     width: 28px;
     height: 28px;
@@ -375,6 +435,25 @@ body {
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.status-membro {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--fundo-sidebar);
+    border-radius: 50%;
+    background-color: #80848E;
+}
+
+.status-membro.online {
+    background-color: var(--cor-online);
+}
+
+.status-membro.offline {
+    background-color: #80848E;
 }
 
 .membro-servidor > span:nth-child(2) {
@@ -850,7 +929,7 @@ button.botao-icone:disabled {
     color: var(--texto-claro);
 }
 
-.cabecalho-conversa {
+.acoes-cabecalho-conversa {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -967,6 +1046,7 @@ button.botao-icone:disabled {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
 }
 
 .metadados-mensagem {
@@ -990,6 +1070,15 @@ button.botao-icone:disabled {
     line-height: 1.4;
     color: #DBDEE1;
     word-break: break-word;
+}
+
+.imagem-mensagem {
+    display: block;
+    max-width: min(420px, 100%);
+    max-height: 420px;
+    margin-top: 4px;
+    border-radius: 8px;
+    object-fit: contain;
 }
 
 /* Rodapé / Input de Mensagem */
@@ -1025,6 +1114,28 @@ button.botao-icone:disabled {
 .botao-anexo:hover,
 .botao-enviar:hover {
     color: var(--texto-claro);
+}
+
+.botao-anexo[aria-disabled="true"],
+.botao-enviar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.botao-anexo[aria-disabled="true"] {
+    pointer-events: none;
+}
+
+.input-imagem-canal {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .formulario-mensagem input {
@@ -1073,5 +1184,18 @@ button.botao-icone:disabled {
 
     .somente-desktop {
         display: none;
+    }
+
+    .layout-aplicativo.membros-abertos {
+        grid-template-columns: var(--largura-rail-servidores) clamp(144px, 34vw, 220px) minmax(0, 1fr);
+    }
+
+    .painel-membros-servidor:not([hidden]) {
+        position: absolute;
+        z-index: 80;
+        top: 0;
+        right: 0;
+        width: min(260px, 48vw);
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
     }
 }

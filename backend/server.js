@@ -58,6 +58,7 @@ const salasVoz = new Map();
 const chamadasDm = new Map();
 const conexoesPorUsuario = new Map();
 const amigosPorUsuario = new Map();
+const encerramentoPorDesconexao = new Map();
 const canaisDeVoz = new Set([
     "comunidade-ifc:geral",
     "comunidade-ifc:estudos"
@@ -129,6 +130,11 @@ io.on("connection", (socket) => {
     console.log("Cliente conectado:", socket.id);
     const usuarioId = socket.data.usuario.usuarioId;
     socket.join(salaUsuario(usuarioId));
+    const temporizadorDesconexao = encerramentoPorDesconexao.get(usuarioId);
+    if (temporizadorDesconexao) {
+        clearTimeout(temporizadorDesconexao);
+        encerramentoPorDesconexao.delete(usuarioId);
+    }
     const conexoesUsuario = conexoesPorUsuario.get(usuarioId) || new Set();
     const estavaOffline = conexoesUsuario.size === 0;
     conexoesUsuario.add(socket.id);
@@ -270,7 +276,21 @@ io.on("connection", (socket) => {
     socket.on("dm:call:status", async (dados = {}) => {
         const usuarioId = Number(dados.usuarioId);
         const atualId = socket.data.usuario.usuarioId;
-        if (!Number.isSafeInteger(usuarioId) || usuarioId < 1 || usuarioId === atualId) return;
+        if (!Number.isSafeInteger(usuarioId) || usuarioId < 1 || usuarioId === atualId) {
+            const chamada = [...chamadasDm.values()].find((item) =>
+                item.chamadorId === atualId || item.destinatarioId === atualId
+            );
+            if (chamada) {
+                socket.emit("dm:call:state", {
+                    estado: chamada.estado,
+                    chamadaId: chamada.chamadaId,
+                    chamadorId: chamada.chamadorId,
+                    destinatarioId: chamada.destinatarioId,
+                    nomeChamador: chamada.nomeChamador
+                });
+            }
+            return;
+        }
 
         try {
             const autorizado = await consultarAutorizacao(socket, { amizade: usuarioId });
@@ -298,8 +318,18 @@ io.on("connection", (socket) => {
         try {
             const autorizado = await consultarAutorizacao(socket, { amizade: usuarioId });
             if (autorizado) {
-                socket.join(`dm:${chaveChamada(atualId, usuarioId)}`);
+                const chamadaId = chaveChamada(atualId, usuarioId);
+                socket.join(`dm:${chamadaId}`);
                 socket.emit("dm:call:ready", { usuarioId });
+                const chamada = chamadasDm.get(chamadaId);
+                if (
+                    chamada?.estado === "tocando"
+                    && chamada.aceita
+                    && chamada.destinatarioId === atualId
+                ) {
+                    chamada.estado = "ativa";
+                    enviarEstadoChamada(chamada, "ativa");
+                }
             }
         } catch (erro) {
             console.error("Falha ao validar a conversa privada para chamadas:", erro.message);
@@ -319,8 +349,8 @@ io.on("connection", (socket) => {
                 return;
             }
             const chamadaId = chaveChamada(atualId, usuarioId);
-            if (!io.sockets.adapter.rooms.get(`dm:${chamadaId}`)?.size) {
-                socket.emit("dm:call:error", { mensagem: "Seu amigo precisa abrir esta conversa para receber a chamada." });
+            if (!io.sockets.adapter.rooms.get(salaUsuario(usuarioId))?.size) {
+                socket.emit("dm:call:error", { mensagem: "Seu amigo está offline e não pode receber a chamada agora." });
                 return;
             }
             if ([...chamadasDm.values()].some((chamada) =>
@@ -353,15 +383,26 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("dm:call:accept", (dados = {}) => {
+    socket.on("dm:call:accept", (dados = {}, responder = () => {}) => {
         const usuarioId = Number(dados.usuarioId);
         const atualId = socket.data.usuario.usuarioId;
         const chamada = Number.isSafeInteger(usuarioId)
             ? chamadasDm.get(chaveChamada(atualId, usuarioId))
             : null;
-        if (!chamada || chamada.estado !== "tocando" || chamada.destinatarioId !== atualId) return;
-        chamada.estado = "ativa";
-        enviarEstadoChamada(chamada, "ativa");
+        if (!chamada || chamada.estado !== "tocando" || chamada.destinatarioId !== atualId) {
+            responder({ ok: false, mensagem: "Esta chamada não está mais disponível." });
+            return;
+        }
+        chamada.aceita = true;
+        const salaConversa = io.sockets.adapter.rooms.get(`dm:${chamada.chamadaId}`);
+        const destinatarioNaConversa = [...(salaConversa || [])].some((socketId) =>
+            io.sockets.sockets.get(socketId)?.data.usuario.usuarioId === atualId
+        );
+        if (destinatarioNaConversa) {
+            chamada.estado = "ativa";
+            enviarEstadoChamada(chamada, "ativa");
+        }
+        responder({ ok: true });
     });
 
     socket.on("dm:call:reject", (dados = {}) => {
@@ -550,10 +591,16 @@ io.on("connection", (socket) => {
             conexoesPorUsuario.delete(usuarioId);
             emitirMudancaPresenca(usuarioId, amigosPorUsuario.get(usuarioId) || new Set(), false);
             amigosPorUsuario.delete(usuarioId);
+            const temporizador = setTimeout(() => {
+                encerramentoPorDesconexao.delete(usuarioId);
+                if (conexoesPorUsuario.has(usuarioId)) return;
+                [...chamadasDm.values()]
+                    .filter((chamada) => chamada.chamadorId === usuarioId || chamada.destinatarioId === usuarioId)
+                    .forEach((chamada) => encerrarChamada(chamada));
+            }, 10000);
+            temporizador.unref?.();
+            encerramentoPorDesconexao.set(usuarioId, temporizador);
         }
-        [...chamadasDm.values()]
-            .filter((chamada) => chamada.chamadorId === usuarioId || chamada.destinatarioId === usuarioId)
-            .forEach((chamada) => encerrarChamada(chamada));
         console.log("Cliente desconectado:", socket.id, motivo);
     });
 });

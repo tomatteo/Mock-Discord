@@ -24,9 +24,10 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
     <title>Configurações do Usuário - Discord Mock</title>
     <link rel="stylesheet" href="../style/configuracoes.css">
     <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
+    <link rel="stylesheet" href="../style/chamadas.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/chamadas.css') ?>">
     <link rel="stylesheet" href="../style/tipografia.css">
 </head>
-<body class="pagina-config" data-foto-perfil="<?= htmlspecialchars($usuarioPerfil['foto_perfil'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+<body class="pagina-config" data-usuario-id="<?= (int) $_SESSION['usuario_id'] ?>" data-foto-perfil="<?= htmlspecialchars($usuarioPerfil['foto_perfil'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Overlay / Modal principal de Configurações -->
     <div id="layout-config" class="config-layout">
@@ -36,7 +37,7 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
             <header class="usuario-resumo">
                 <div class="avatar-usuario" id="avatar-inicial" aria-hidden="true"><?= htmlspecialchars($inicialUsuario, ENT_QUOTES, 'UTF-8') ?></div>
                 <img id="img-avatar-sidebar" class="avatar-img-pequeno" src="" alt="Avatar do usuário logado" hidden>
-                <span class="nome-usuario" id="nome-usuario-sidebar">Nome Usuário</span>
+                <span class="nome-usuario" id="nome-usuario-sidebar"><?= htmlspecialchars($usuarioPerfil['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
                 <a href="inicio.php" class="btn-fechar-mobile-lista" aria-label="Fechar configurações">✕</a>
             </header>
 
@@ -53,7 +54,10 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
             </nav>
 
             <div class="sidebar-acoes-extra">
-                <a href="index.php" id="btn-sair-conta" class="btn-sair">Sair da Conta</a>
+                <form action="sair.php" method="post">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" id="btn-sair-conta" class="btn-sair">Sair da Conta</button>
+                </form>
             </div>
         </aside>
 
@@ -86,7 +90,7 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
                             <img id="img-avatar-perfil" class="avatar-img-grande" src="" alt="Foto de perfil do usuário" hidden>
                         </div>
                         <div class="perfil-info-acoes">
-                            <h2 id="perfil-username">Nome Usuário</h2>
+                            <h2 id="perfil-username"><?= htmlspecialchars($usuarioPerfil['apelido'], ENT_QUOTES, 'UTF-8') ?></h2>
                             <p class="texto-suave">Status: Online</p>
                             <div class="botoes-foto">
                                 <label for="input-foto-perfil" class="btn-primario btn-pequeno">Alterar Foto</label>
@@ -232,6 +236,7 @@ $inicialUsuario = mb_strtoupper(mb_substr($usuarioPerfil['apelido'], 0, 1, 'UTF-
 
     <script src="/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível.')"></script>
     <script src="../js/sons.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/sons.js') ?>"></script>
+    <script src="../js/chamadas.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/chamadas.js') ?>"></script>
     <script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
     <script src="../js/configuracoes.js"></script>
 </body>

@@ -12,6 +12,7 @@ services:
         - ./src:/var/www/html
         - ./style:/var/www/assets/style
         - ./js:/var/www/assets/js
+        - ./sons:/var/www/assets/sons:ro
         - server_icons:/var/www/assets/img
     depends_on:
       db:

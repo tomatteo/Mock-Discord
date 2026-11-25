@@ -1,0 +1,62 @@
+.aviso-chamada-global {
+    position: fixed;
+    z-index: 10000;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    width: min(390px, calc(100vw - 32px));
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid #23A559;
+    border-radius: 12px;
+    background: #232428;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+    color: #F2F3F5;
+    font: 600 15px/1.4 Arial, Helvetica, sans-serif;
+}
+
+.aviso-chamada-global[hidden] {
+    display: none;
+}
+
+.aviso-chamada-global-texto {
+    margin: 0;
+}
+
+.aviso-chamada-global-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.aviso-chamada-global-acoes button {
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 6px;
+    color: #FFFFFF;
+    cursor: pointer;
+    font: inherit;
+}
+
+.aviso-chamada-global-acoes button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.aviso-chamada-atender {
+    background: #23A559;
+}
+
+.aviso-chamada-recusar {
+    background: #F23F43;
+}
+
+@media (max-width: 480px) {
+    .aviso-chamada-global {
+        top: 12px;
+        right: 12px;
+        width: calc(100vw - 24px);
+    }
+}

@@ -201,9 +201,10 @@ $dataCriacao = (new DateTimeImmutable($servidor['data_cadastro']))->format('d/m/
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style/config-servidor.css">
     <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
+    <link rel="stylesheet" href="../style/chamadas.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/chamadas.css') ?>">
     <link rel="stylesheet" href="../style/tipografia.css">
 </head>
-<body>
+<body data-usuario-id="<?= (int) $_SESSION['usuario_id'] ?>">
 
 <div class="layout-configuracoes" id="layout-configuracoes">
     <!-- cabeçalho mobile (aparece abaixo de 768px) -->
@@ -433,6 +434,7 @@ $dataCriacao = (new DateTimeImmutable($servidor['data_cadastro']))->format('d/m/
 
 <script src="/socket.io/socket.io.js" onerror="console.error('Servidor em tempo real indisponível.')"></script>
 <script src="../js/sons.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/sons.js') ?>"></script>
+<script src="../js/chamadas.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/chamadas.js') ?>"></script>
 <script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
 <script src="../js/permissoes-servidor.js"></script>
 <script src="../js/config-servidor.js"></script>

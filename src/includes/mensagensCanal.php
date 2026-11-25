@@ -13,14 +13,44 @@ function responderJson(int $status, array $dados): never
     exit;
 }
 
+function serializarMensagemCanal(array $mensagem): array
+{
+    $texto = $mensagem['mensagem'];
+    $tipo = 'texto';
+    $urlImagem = null;
+    if (preg_match('~\A\[imagem\](/img/canais/[a-f0-9]{32}\.(?:jpg|png|webp))\z~', $texto, $correspondencia)) {
+        $tipo = 'imagem';
+        $urlImagem = $correspondencia[1];
+        $texto = '';
+    }
+
+    return [
+        'id' => (int) $mensagem['id'],
+        'usuarioId' => (int) $mensagem['usuario_id'],
+        'usuario' => $mensagem['apelido'],
+        'fotoPerfil' => $mensagem['foto_perfil'],
+        'tipo' => $tipo,
+        'texto' => $texto,
+        'url' => $urlImagem,
+        'enviadoEm' => $mensagem['data_envio']
+    ];
+}
+
 $metodo = $_SERVER['REQUEST_METHOD'];
 if ($metodo === 'GET') {
     $entrada = $_GET;
 } elseif ($metodo === 'POST') {
-    try {
-        $entrada = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
-    } catch (JsonException) {
-        responderJson(400, ['erro' => 'Requisição inválida.']);
+    $tipoConteudo = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (str_starts_with($tipoConteudo, 'application/json')) {
+        try {
+            $entrada = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            responderJson(400, ['erro' => 'Requisição inválida.']);
+        }
+    } elseif (str_starts_with($tipoConteudo, 'multipart/form-data')) {
+        $entrada = $_POST;
+    } else {
+        responderJson(415, ['erro' => 'Tipo de requisição não suportado.']);
     }
 } else {
     responderJson(405, ['erro' => 'Método não permitido.']);
@@ -29,26 +59,34 @@ if (!is_array($entrada)) {
     responderJson(400, ['erro' => 'Requisição inválida.']);
 }
 
-$idServidor = filter_var($entrada['servidor'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$caminhoImagemSalva = null;
 $idCanal = filter_var($entrada['canal'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-if ($idServidor === false || $idCanal === false) {
-    responderJson(422, ['erro' => 'Servidor ou canal inválido.']);
+if ($idCanal === false) {
+    responderJson(422, ['erro' => 'Canal inválido.']);
+}
+if ($metodo === 'POST') {
+    $token = $entrada['csrf_token'] ?? '';
+    if (
+        !is_string($token)
+        || !isset($_SESSION['csrf_token'])
+        || !hash_equals($_SESSION['csrf_token'], $token)
+    ) {
+        responderJson(403, ['erro' => 'Sua sessão expirou. Atualize a página e tente novamente.']);
+    }
 }
 
 try {
-    // confere o vinculo do usuario antes de permitir acesso as mensagens do canal.
+    // Confere o vínculo do usuário com o servidor dono do canal.
     $stmt = $pdo->prepare(
         "SELECT c.id
          FROM canais c
          INNER JOIN servidores_usuario su ON su.id_servidor = c.id_servidor
          WHERE c.id = :canal
-           AND c.id_servidor = :servidor
            AND c.tipo = 'texto'
            AND su.id_usuario = :usuario"
     );
     $stmt->execute([
         ':canal' => $idCanal,
-        ':servidor' => $idServidor,
         ':usuario' => $_SESSION['usuario_id']
     ]);
     if (!$stmt->fetchColumn()) {
@@ -75,23 +113,60 @@ try {
         $consulta .= ' ORDER BY cm.data_envio, cm.id';
         $stmt = $pdo->prepare($consulta);
         $stmt->execute($parametros);
-        $mensagens = array_map(
-            static fn(array $mensagem): array => [
-                'id' => (int) $mensagem['id'],
-                'usuarioId' => (int) $mensagem['usuario_id'],
-                'usuario' => $mensagem['apelido'],
-                'fotoPerfil' => $mensagem['foto_perfil'],
-                'texto' => $mensagem['mensagem'],
-                'enviadoEm' => $mensagem['data_envio']
-            ],
-            $stmt->fetchAll(PDO::FETCH_ASSOC)
-        );
+        $mensagens = array_map('serializarMensagemCanal', $stmt->fetchAll(PDO::FETCH_ASSOC));
         responderJson(200, ['mensagens' => $mensagens]);
     }
 
-    $texto = trim($entrada['mensagem'] ?? '');
-    if ($texto === '' || mb_strlen($texto) > 250) {
-        responderJson(422, ['erro' => 'A mensagem deve ter entre 1 e 250 caracteres.']);
+    $arquivo = $_FILES['imagem'] ?? null;
+    $mensagem = null;
+    if (is_array($arquivo) && ($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        if (($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_INI_SIZE) {
+            responderJson(413, ['erro' => 'A imagem deve ter no máximo 5 MB.']);
+        }
+        if (($arquivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            responderJson(400, ['erro' => 'Não foi possível receber a imagem. Selecione-a novamente.']);
+        }
+        if (($arquivo['size'] ?? 0) > 5 * 1024 * 1024) {
+            responderJson(413, ['erro' => 'A imagem deve ter no máximo 5 MB.']);
+        }
+
+        $tipoImagem = (new finfo(FILEINFO_MIME_TYPE))->file($arquivo['tmp_name']);
+        $extensoes = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ];
+        $dimensoes = @getimagesize($arquivo['tmp_name']);
+        if (
+            !isset($extensoes[$tipoImagem])
+            || $dimensoes === false
+            || $dimensoes[0] > 4096
+            || $dimensoes[1] > 4096
+        ) {
+            responderJson(415, ['erro' => 'Use uma imagem JPEG, PNG ou WebP válida, de até 4096 × 4096 pixels.']);
+        }
+
+        $diretorioImagens = (getenv('SERVER_ICONS_DIR') ?: '/var/www/assets/img') . '/canais';
+        if (!is_dir($diretorioImagens) && !mkdir($diretorioImagens, 0755, true) && !is_dir($diretorioImagens)) {
+            responderJson(500, ['erro' => 'Não foi possível preparar o armazenamento das imagens.']);
+        }
+        $nomeArquivo = bin2hex(random_bytes(16)) . '.' . $extensoes[$tipoImagem];
+        $caminhoImagemSalva = $diretorioImagens . '/' . $nomeArquivo;
+        if (!move_uploaded_file($arquivo['tmp_name'], $caminhoImagemSalva)) {
+            $caminhoImagemSalva = null;
+            responderJson(500, ['erro' => 'Não foi possível gravar a imagem enviada.']);
+        }
+        $mensagem = '[imagem]/img/canais/' . $nomeArquivo;
+    } else {
+        $texto = $entrada['mensagem'] ?? '';
+        if (!is_string($texto)) {
+            responderJson(422, ['erro' => 'A mensagem é inválida.']);
+        }
+        $texto = trim($texto);
+        if ($texto === '' || mb_strlen($texto) > 250) {
+            responderJson(422, ['erro' => 'A mensagem deve ter entre 1 e 250 caracteres.']);
+        }
+        $mensagem = $texto;
     }
 
     $stmt = $pdo->prepare(
@@ -101,7 +176,7 @@ try {
     $stmt->execute([
         ':canal' => $idCanal,
         ':usuario' => $_SESSION['usuario_id'],
-        ':mensagem' => $texto
+        ':mensagem' => $mensagem
     ]);
     $idMensagem = (int) $pdo->lastInsertId();
 
@@ -114,17 +189,11 @@ try {
     $stmt->execute([':mensagem' => $idMensagem]);
     $mensagemSalva = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    responderJson(201, [
-        'mensagem' => [
-            'id' => (int) $mensagemSalva['id'],
-            'usuarioId' => (int) $mensagemSalva['usuario_id'],
-            'usuario' => $mensagemSalva['apelido'],
-            'fotoPerfil' => $mensagemSalva['foto_perfil'],
-            'texto' => $mensagemSalva['mensagem'],
-            'enviadoEm' => $mensagemSalva['data_envio']
-        ]
-    ]);
+    responderJson(201, ['mensagem' => serializarMensagemCanal($mensagemSalva)]);
 } catch (Throwable $erro) {
+    if (is_string($caminhoImagemSalva) && is_file($caminhoImagemSalva) && !unlink($caminhoImagemSalva)) {
+        error_log('Não foi possível remover uma imagem de canal após falha ao salvar a mensagem.');
+    }
     error_log($erro->getMessage());
     responderJson(500, ['erro' => 'Não foi possível carregar ou enviar as mensagens.']);
 }

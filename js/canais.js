@@ -1,14 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
     const listaMensagens = document.getElementById("lista-mensagens");
     const inputMensagem = document.getElementById("input-mensagem");
+    const inputImagem = document.getElementById("input-imagem-canal");
     const erroMensagem = document.getElementById("erro-mensagem");
     const formularioMensagem = document.getElementById("form-mensagem");
+    const botaoAnexo = formularioMensagem.querySelector(".botao-anexo");
     const dialogoCanal = document.getElementById("dialogo-canal");
     const formularioCanal = document.getElementById("form-dialogo-canal");
     const inputNomeCanal = document.getElementById("input-nome-canal");
     const erroDialogo = document.getElementById("erro-dialogo-canal");
     const listaCanaisTexto = document.getElementById("lista-canais-texto");
     const tituloCanalAtivo = document.getElementById("titulo-canal-ativo");
+    const botaoListaMembros = document.getElementById("botao-lista-membros");
+    const painelMembros = document.getElementById("painel-membros-servidor");
+    const botaoFecharMembros = document.getElementById("fechar-lista-membros");
     const servidorId = Number(listaCanaisTexto.dataset.servidorId);
     const usuarioId = Number(document.querySelector(".layout-aplicativo").dataset.usuarioId);
     let canalIdAtual = Number(listaCanaisTexto.querySelector(".item-canal.ativo")?.dataset.canalId) || null;
@@ -16,6 +21,28 @@ document.addEventListener("DOMContentLoaded", () => {
     let maiorIdMensagem = 0;
     let carregandoMensagens = false;
     let buscandoNovasMensagens = false;
+
+    function definirPainelMembrosAberto(aberto) {
+        painelMembros.hidden = !aberto;
+        document.querySelector(".layout-aplicativo").classList.toggle("membros-abertos", aberto);
+        botaoListaMembros.setAttribute("aria-expanded", String(aberto));
+        botaoListaMembros.setAttribute("aria-label", aberto ? "Ocultar membros" : "Mostrar membros");
+        botaoListaMembros.title = aberto ? "Ocultar membros" : "Mostrar membros";
+    }
+
+    botaoListaMembros.addEventListener("click", () => {
+        definirPainelMembrosAberto(painelMembros.hidden);
+    });
+    botaoFecharMembros.addEventListener("click", () => {
+        definirPainelMembrosAberto(false);
+        botaoListaMembros.focus();
+    });
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !painelMembros.hidden) {
+            definirPainelMembrosAberto(false);
+            botaoListaMembros.focus();
+        }
+    });
 
     function mostrarEstadoVazio(titulo, descricao = "") {
         const estado = document.createElement("div");
@@ -79,6 +106,25 @@ document.addEventListener("DOMContentLoaded", () => {
         horario.className = "horario-mensagem";
         horario.dateTime = mensagem.enviadoEm.replace(" ", "T");
         horario.textContent = formatarHora(mensagem.enviadoEm);
+
+        if (mensagem.tipo === "imagem" && mensagem.url) {
+            const imagemMensagem = document.createElement("img");
+            imagemMensagem.className = "imagem-mensagem";
+            imagemMensagem.src = mensagem.url;
+            imagemMensagem.alt = `Imagem enviada por ${mensagem.usuario}`;
+            imagemMensagem.loading = "lazy";
+            imagemMensagem.onerror = () => {
+                imagemMensagem.remove();
+                const erroImagem = document.createElement("span");
+                erroImagem.className = "texto-mensagem";
+                erroImagem.textContent = "Não foi possível carregar esta imagem.";
+                conteudo.appendChild(erroImagem);
+            };
+            metadados.append(autor, horario);
+            conteudo.append(metadados, imagemMensagem);
+            item.append(avatar, conteudo);
+            return item;
+        }
 
         const texto = document.createElement("div");
         texto.className = "texto-mensagem";
@@ -189,6 +235,8 @@ document.addEventListener("DOMContentLoaded", () => {
         inputMensagem.placeholder = `Conversar em # ${nomeCanal}`;
         inputMensagem.setAttribute("aria-label", `Digite sua mensagem em # ${nomeCanal}`);
         inputMensagem.disabled = false;
+        inputImagem.disabled = false;
+        botaoAnexo.removeAttribute("aria-disabled");
         inputMensagem.value = "";
         erroMensagem.textContent = "";
         history.replaceState(null, "", `${location.pathname}?servidor=${servidorId}&canal=${canalIdAtual}`);
@@ -227,6 +275,60 @@ document.addEventListener("DOMContentLoaded", () => {
         selecionarCanal(canal);
     });
 
+    inputImagem.addEventListener("change", async () => {
+        const arquivo = inputImagem.files[0];
+        const canalEnvioId = canalIdAtual;
+        if (!arquivo) return;
+        if (!canalEnvioId) {
+            erroMensagem.textContent = "Selecione um canal de texto antes de enviar uma imagem.";
+            inputImagem.value = "";
+            return;
+        }
+        if (arquivo.size > 5 * 1024 * 1024) {
+            erroMensagem.textContent = "A imagem deve ter no máximo 5 MB.";
+            inputImagem.value = "";
+            return;
+        }
+        if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
+            erroMensagem.textContent = "Use uma imagem JPEG, PNG ou WebP.";
+            inputImagem.value = "";
+            return;
+        }
+
+        const dadosFormulario = new FormData();
+        dadosFormulario.set("servidor", String(servidorId));
+        dadosFormulario.set("canal", String(canalEnvioId));
+        dadosFormulario.set("csrf_token", document.querySelector(".layout-aplicativo").dataset.csrfToken);
+        dadosFormulario.set("imagem", arquivo);
+
+        inputImagem.disabled = true;
+        botaoAnexo.setAttribute("aria-disabled", "true");
+        erroMensagem.textContent = "Enviando imagem...";
+        try {
+            const resposta = await fetch("includes/mensagensCanal.php", {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                body: dadosFormulario
+            });
+            const resultado = await lerResposta(resposta);
+            if (canalIdAtual === canalEnvioId) {
+                adicionarMensagem(resultado.mensagem);
+                erroMensagem.textContent = "";
+            }
+        } catch (erro) {
+            console.error("Não foi possível enviar a imagem ao canal:", erro);
+            if (canalIdAtual === canalEnvioId) erroMensagem.textContent = erro.message;
+        } finally {
+            inputImagem.value = "";
+            inputImagem.disabled = !canalIdAtual;
+            if (canalIdAtual) {
+                botaoAnexo.removeAttribute("aria-disabled");
+            } else {
+                botaoAnexo.setAttribute("aria-disabled", "true");
+            }
+        }
+    });
+
     formularioMensagem.addEventListener("submit", async (evento) => {
         evento.preventDefault();
         const texto = inputMensagem.value.trim();
@@ -259,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     servidor: servidorId,
                     canal: canalEnvioId,
+                    csrf_token: document.querySelector(".layout-aplicativo").dataset.csrfToken,
                     mensagem: texto
                 })
             });

@@ -84,16 +84,19 @@ sudo docker compose down
   * Barra lateral **"Ativo agora"**, exibindo exclusivamente amigos adicionados que estão online e em chamada de voz em servidores em comum.
 * **Conversas Privadas / DM (`src/dm.php`):**
   * Lista de conversas gerada pelas amizades da conta autenticada e acesso validado para cada contato.
-  * Histórico e envio de mensagens persistidos no MySQL e atualizados automaticamente sem recarregar a página.
-  * Chamadas privadas de voz com sinalização Socket.IO, aceite/recusa e áudio WebRTC.
+  * Histórico e envio de mensagens e imagens persistidos no MySQL e atualizados automaticamente sem recarregar a página.
+  * Chamadas privadas de voz com sinalização Socket.IO, aceite/recusa global e áudio WebRTC.
+  * Sons MP3 de mensagem (`sons/discord-notificacao.mp3`) e chamada (`sons/discord-call-sound.mp3`), servidos por `/sons/`.
   * Fotos de perfil persistidas por usuário e exibidas nas conversas e na lista de amigos.
 * **Servidores e Canais (`src/servidor.html`):**
-  * Alternância entre canais de texto com históricos de mensagens independentes persistidos no `localStorage`.
+  * Alternância entre canais de texto com histórico de mensagens persistido no MySQL e atualização automática.
+  * Envio de imagens JPEG, PNG e WebP de até 5 MB pelo botão `+`; os arquivos ficam no volume persistente de imagens do Docker.
   * Indicador visual lateral do servidor ativo e painel fixo do usuário sobreposto à base das barras laterais.
 * **Criação de Servidores (`js/criar-servidor.js`):**
   * Modal reutilizável acionado pelo botão `+` na barra lateral, com upload e pré-visualização circular de ícone via `FileReader`, geração automática de iniciais e inserção dinâmica na lista de servidores.
 * **Configurações do Servidor e do Usuário (`src/config-servidor.php`, `src/configuracoes.html`):**
   * Edição persistente de nome, ícone e cor do servidor selecionado, com pré-visualização em tempo real e acesso restrito ao dono e administradores.
+  * Configurações da conta em modal sobre a tela atual, exibindo o nome autenticado e encerrando a sessão ao sair.
 * **Design Responsivo (Desktop e Mobile):**
   * Adaptação automática para telas estreitas (`<= 768px`) com navegação em subtelas e botões de retorno dedicados.
 

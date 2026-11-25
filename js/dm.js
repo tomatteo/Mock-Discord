@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputBuscaDesktop = document.getElementById("input-busca-mensagens");
     const inputBuscaMobile = document.getElementById("input-busca-mobile");
     const inputMensagem = document.getElementById("input-mensagem-dm");
+    const inputImagem = document.getElementById("input-imagem-dm");
     const erroMensagem = document.getElementById("erro-mensagem-dm");
     const formMensagem = document.getElementById("form-mensagem-dm");
     const listaMensagens = document.getElementById("lista-mensagens-dm");
@@ -19,14 +20,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnEncerrarChamada = document.getElementById("btn-encerrar-chamada");
     const btnMic = document.getElementById("btn-mic");
     const btnAudio = document.getElementById("btn-audio");
-    const socket = typeof window.io === "function"
+    const socket = window.mockDiscordSocket || (typeof window.io === "function"
         ? window.io({ withCredentials: true })
-        : null;
+        : null);
     if (socket) window.mockDiscordSocket = socket;
     const idsMensagens = new Set(
         [...listaMensagens.querySelectorAll("[data-mensagem-id]")]
             .map((item) => Number(item.dataset.mensagemId))
     );
+    const chamadasEncerradasExibidas = new Set();
     let fluxoChamada = "inativa";
     let streamLocal = null;
     let conexaoP2P = null;
@@ -68,6 +70,24 @@ document.addEventListener("DOMContentLoaded", () => {
         hora.textContent = mensagem.time;
         meta.append(autor, hora);
 
+        if (mensagem.type === "imagem" && mensagem.imageUrl) {
+            const imagem = document.createElement("img");
+            imagem.className = "imagem-mensagem-dm";
+            imagem.src = mensagem.imageUrl;
+            imagem.alt = `Imagem enviada por ${mensagem.author}`;
+            imagem.loading = "lazy";
+            imagem.onerror = () => {
+                imagem.remove();
+                const erroImagem = document.createElement("p");
+                erroImagem.className = "texto-mensagem";
+                erroImagem.textContent = "Não foi possível carregar esta imagem.";
+                conteudo.appendChild(erroImagem);
+            };
+            conteudo.append(meta, imagem);
+            artigo.append(avatar, conteudo);
+            return artigo;
+        }
+
         const texto = document.createElement("p");
         texto.className = "texto-mensagem";
         texto.textContent = mensagem.message;
@@ -93,12 +113,32 @@ document.addEventListener("DOMContentLoaded", () => {
         filtrarMensagens(inputBuscaDesktop.value || inputBuscaMobile.value);
     }
 
+    function inserirAvisoChamadaEncerrada(chamadaId) {
+        const idChamada = String(chamadaId || "");
+        if (idChamada && chamadasEncerradasExibidas.has(idChamada)) return;
+
+        const estavaNoFinal = containerMensagens.scrollHeight
+            - containerMensagens.scrollTop
+            - containerMensagens.clientHeight < 120;
+        document.getElementById("conversa-vazia")?.remove();
+
+        const aviso = document.createElement("p");
+        aviso.className = "evento-sistema chamada-encerrada";
+        aviso.setAttribute("role", "status");
+        aviso.textContent = "Chamada encerrada";
+        listaMensagens.appendChild(aviso);
+
+        if (idChamada) chamadasEncerradasExibidas.add(idChamada);
+        if (estavaNoFinal) containerMensagens.scrollTop = containerMensagens.scrollHeight;
+    }
+
     function filtrarMensagens(termo = "") {
         const busca = termo.toLowerCase().trim();
         listaMensagens.querySelectorAll(".item-mensagem").forEach((item) => {
-            const texto = item.querySelector(".texto-mensagem").textContent.toLowerCase();
+            const texto = item.querySelector(".texto-mensagem")?.textContent.toLowerCase() || "";
             const autor = item.querySelector(".autor-mensagem").textContent.toLowerCase();
-            item.style.display = texto.includes(busca) || autor.includes(busca) ? "flex" : "none";
+            const imagem = item.querySelector(".imagem-mensagem-dm");
+            item.style.display = texto.includes(busca) || autor.includes(busca) || Boolean(imagem && busca) ? "flex" : "none";
         });
     }
 
@@ -123,6 +163,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
     atualizarMensagens();
     window.setInterval(atualizarMensagens, 2000);
+
+    inputImagem.addEventListener("change", async () => {
+        const arquivo = inputImagem.files[0];
+        if (!arquivo) return;
+        if (arquivo.size > 5 * 1024 * 1024) {
+            erroMensagem.textContent = "A imagem deve ter no máximo 5 MB.";
+            inputImagem.value = "";
+            return;
+        }
+        if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
+            erroMensagem.textContent = "Use uma imagem JPEG, PNG ou WebP.";
+            inputImagem.value = "";
+            return;
+        }
+
+        erroMensagem.textContent = "";
+        const botaoAnexar = formMensagem.querySelector(".btn-anexar");
+        botaoAnexar.setAttribute("aria-disabled", "true");
+        try {
+            const dadosFormulario = new FormData(formMensagem);
+            dadosFormulario.set("imagem", arquivo);
+            const resposta = await fetch(formMensagem.action, {
+                method: "POST",
+                body: dadosFormulario,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+            let dados;
+            try {
+                dados = await resposta.json();
+            } catch {
+                throw new Error("O servidor retornou uma resposta inválida ao enviar a imagem.");
+            }
+            if (!resposta.ok) throw new Error(dados.erro || "Não foi possível enviar a imagem.");
+            inserirMensagem(dados.mensagem);
+        } catch (erro) {
+            erroMensagem.textContent = erro.message;
+        } finally {
+            inputImagem.value = "";
+            botaoAnexar.removeAttribute("aria-disabled");
+        }
+    });
 
     formMensagem.addEventListener("submit", async (evento) => {
         evento.preventDefault();
@@ -371,11 +457,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } else {
-            const mensagem = dados.estado === "recusada"
-                ? "A chamada foi recusada."
-                : "A chamada foi encerrada.";
+            if (dados.estado === "encerrada") {
+                inserirAvisoChamadaEncerrada(dados.chamadaId);
+            } else if (dados.estado === "recusada") {
+                exibirErroChamada("A chamada foi recusada.");
+            }
             limparChamada();
-            exibirErroChamada(mensagem);
         }
     });
     socket?.on("dm:call:signal", (dados) => {

@@ -87,13 +87,14 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style/servidor.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/servidor.css') ?>">
     <link rel="stylesheet" href="../style/notificacoes.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/notificacoes.css') ?>">
-    <link rel="stylesheet" href="../style/configuracoes-popup.css">
+    <link rel="stylesheet" href="../style/chamadas.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/chamadas.css') ?>">
+    <link rel="stylesheet" href="../style/configuracoes-popup.css?v=<?= filemtime(dirname(__DIR__) . '/assets/style/configuracoes-popup.css') ?>">
     <link rel="stylesheet" href="../style/modal-servidor.css">
     <link rel="stylesheet" href="../style/tipografia.css">
 </head>
 <body>
 
-<div class="layout-aplicativo" data-usuario-id="<?= (int) $_SESSION['usuario_id'] ?>" style="--cor-servidor: <?= htmlspecialchars($corServidor, ENT_QUOTES, 'UTF-8') ?>;">
+<div class="layout-aplicativo" data-usuario-id="<?= (int) $_SESSION['usuario_id'] ?>" data-csrf-token="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>" style="--cor-servidor: <?= htmlspecialchars($corServidor, ENT_QUOTES, 'UTF-8') ?>;">
     <!-- barra lateral servidores -->
     <?php
     include __DIR__ . '/includes/sidebarServidores.php';
@@ -175,26 +176,6 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
                         <ul class="voz-usuarios-lista" data-sala-voz="comunidade-ifc:estudos"
                             aria-label="Participantes no canal Estudos" aria-live="polite" hidden></ul>
                     </li>
-                </ul>
-            </section>
-            <section class="categoria-canal categoria-membros">
-                <div class="cabecalho-categoria">
-                    <span><i class="bi bi-chevron-down"></i> Membros — <?= count($membrosServidor) ?></span>
-                </div>
-                <ul id="lista-membros-servidor" data-servidor-id="<?= (int) $idServidor ?>">
-                    <?php foreach ($membrosServidor as $membro): ?>
-                        <li class="membro-servidor" data-usuario-id="<?= (int) $membro['id'] ?>">
-                            <span class="avatar-membro" aria-hidden="true">
-                                <?php if (!empty($membro['foto_perfil'])): ?>
-                                    <img src="<?= htmlspecialchars($membro['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
-                                <?php else: ?>
-                                    <i class="bi bi-person-fill"></i>
-                                <?php endif; ?>
-                            </span>
-                            <span><?= htmlspecialchars($membro['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
-                            <small>#<?= (int) $membro['id'] ?></small>
-                        </li>
-                    <?php endforeach; ?>
                 </ul>
             </section>
         </div>
@@ -284,8 +265,16 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
                 <h2 id="titulo-canal-ativo"><?= htmlspecialchars($canalSelecionado['nome'] ?? 'Selecione um canal', ENT_QUOTES, 'UTF-8') ?></h2>
             </div>
 
-            <div class="cabecalho-conversa">
-                <button class="botao-icone somente-desktop" title="Lista de Membros" aria-label="Lista de Membros">
+            <div class="acoes-cabecalho-conversa">
+                <button
+                    type="button"
+                    class="botao-icone"
+                    id="botao-lista-membros"
+                    title="Mostrar membros"
+                    aria-label="Mostrar membros"
+                    aria-controls="painel-membros-servidor"
+                    aria-expanded="false"
+                >
                     <i class="bi bi-people-fill"></i>
                 </button>
                 <div class="caixa-busca somente-desktop">
@@ -307,9 +296,10 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
         <!-- input de nova mensagem -->
         <footer class="chat-footer">
             <form id="form-mensagem" class="formulario-mensagem" novalidate>
-                <button type="button" class="botao-anexo" title="Enviar arquivo" aria-label="Anexar arquivo">
+                <label for="input-imagem-canal" class="botao-anexo" title="Enviar imagem" aria-label="Anexar imagem" <?= $canalSelecionado ? '' : 'aria-disabled="true"' ?>>
                     <i class="bi bi-plus-circle-fill"></i>
-                </button>
+                </label>
+                <input type="file" id="input-imagem-canal" class="input-imagem-canal" accept="image/jpeg,image/png,image/webp" <?= $canalSelecionado ? '' : 'disabled' ?>>
                 <input
                     type="text"
                     id="input-mensagem"
@@ -329,6 +319,30 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
             </p>
         </footer>
     </main>
+    <aside class="painel-membros-servidor" id="painel-membros-servidor" aria-label="Membros do servidor" hidden>
+        <header class="cabecalho-membros-servidor">
+            <h2>Membros — <span id="quantidade-membros"><?= count($membrosServidor) ?></span></h2>
+            <button type="button" class="botao-icone" id="fechar-lista-membros" title="Fechar lista de membros" aria-label="Fechar lista de membros">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </header>
+        <ul id="lista-membros-servidor" data-servidor-id="<?= (int) $idServidor ?>" aria-live="polite">
+            <?php foreach ($membrosServidor as $membro): ?>
+                <li class="membro-servidor" data-usuario-id="<?= (int) $membro['id'] ?>">
+                    <span class="avatar-membro" aria-hidden="true">
+                        <?php if (!empty($membro['foto_perfil'])): ?>
+                            <img src="<?= htmlspecialchars($membro['foto_perfil'], ENT_QUOTES, 'UTF-8') ?>" alt="">
+                        <?php else: ?>
+                            <i class="bi bi-person-fill"></i>
+                        <?php endif; ?>
+                        <span class="status-membro offline" aria-label="Offline"></span>
+                    </span>
+                    <span><?= htmlspecialchars($membro['apelido'], ENT_QUOTES, 'UTF-8') ?></span>
+                    <small>#<?= (int) $membro['id'] ?></small>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </aside>
 </div>
 
 <script src="/socket.io/socket.io.js" onerror="console.error('Servidor de voz indisponível.')"></script>
@@ -753,11 +767,12 @@ $canalSelecionado ??= $canaisTexto[0] ?? null;
     window.addEventListener("beforeunload", () => socket.emit("voz:sair"));
 </script>
 <script src="../js/permissoes-servidor.js"></script>
+<script src="../js/chamadas.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/chamadas.js') ?>"></script>
 <script src="../js/notificacoes.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/notificacoes.js') ?>"></script>
 <script src="../js/canais.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/canais.js') ?>"></script>
 <script src="../js/mensagens.js"></script>
-<script src="../js/amigos.js"></script>
-<script src="../js/configuracoes-popup.js"></script>
+<script src="../js/amigos.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/amigos.js') ?>"></script>
+<script src="../js/configuracoes-popup.js?v=<?= filemtime(dirname(__DIR__) . '/assets/js/configuracoes-popup.js') ?>"></script>
 <script src="../js/criar-servidor.js"></script>
 </body>
 </html>

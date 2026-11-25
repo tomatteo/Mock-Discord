@@ -17,8 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const feedbackConvite = document.getElementById("feedback-convite-servidor");
     const listaMembros = document.getElementById("lista-membros-servidor");
     const listaAtivoAgora = document.getElementById("lista-ativo-agora");
+    const usuarioAtualId = Number(document.querySelector(".layout-aplicativo")?.dataset.usuarioId);
     let amigosConhecidos = [];
+    let membrosServidorAtuais = [];
     const usuariosOnline = new Set(window.mockDiscordOnlineIds || []);
+
+    function usuarioEstaOnline(usuarioId) {
+        return Number(usuarioId) === usuarioAtualId || usuariosOnline.has(Number(usuarioId));
+    }
 
     function atualizarStatusAmigos() {
         amigosConhecidos.forEach((amigo) => {
@@ -33,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         renderizarAmigosOnline();
+        if (listaMembros && membrosServidorAtuais.length > 0) {
+            renderizarMembros(membrosServidorAtuais);
+        }
         window.dispatchEvent(new Event("mock-discord:presence-updated"));
     }
 
@@ -272,36 +281,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderizarMembros(membros) {
         if (!listaMembros) return;
+        membrosServidorAtuais = membros;
         listaMembros.replaceChildren();
-        membros.forEach((membro) => {
-            const item = document.createElement("li");
-            item.className = "membro-servidor";
-            item.dataset.usuarioId = membro.id;
+        const membrosOnline = membros.filter((membro) => usuarioEstaOnline(membro.id));
+        const membrosOffline = membros.filter((membro) => !usuarioEstaOnline(membro.id));
 
-            const avatar = document.createElement("span");
-            avatar.className = "avatar-membro";
-            avatar.setAttribute("aria-hidden", "true");
-            if (membro.foto_perfil) {
-                const imagem = document.createElement("img");
-                imagem.src = membro.foto_perfil;
-                imagem.alt = "";
-                avatar.appendChild(imagem);
-            } else {
-                const icone = document.createElement("i");
-                icone.className = "bi bi-person-fill";
-                avatar.appendChild(icone);
-            }
+        function adicionarGrupoMembros(titulo, grupo) {
+            if (grupo.length === 0) return;
+            const cabecalho = document.createElement("li");
+            cabecalho.className = "grupo-membros-titulo";
+            cabecalho.textContent = `${titulo} — ${grupo.length}`;
+            listaMembros.appendChild(cabecalho);
 
-            const nome = document.createElement("span");
-            nome.textContent = membro.apelido;
-            const identificador = document.createElement("small");
-            identificador.textContent = `#${membro.id}`;
-            item.append(avatar, nome, identificador);
-            listaMembros.appendChild(item);
-        });
+            grupo.forEach((membro) => {
+                const item = document.createElement("li");
+                item.className = "membro-servidor";
+                item.dataset.usuarioId = membro.id;
 
-        const titulo = document.querySelector(".categoria-membros .cabecalho-categoria span");
-        if (titulo) titulo.textContent = `Membros — ${membros.length}`;
+                const avatar = document.createElement("span");
+                avatar.className = "avatar-membro";
+                avatar.setAttribute("aria-hidden", "true");
+                if (membro.foto_perfil) {
+                    const imagem = document.createElement("img");
+                    imagem.src = membro.foto_perfil;
+                    imagem.alt = "";
+                    avatar.appendChild(imagem);
+                } else {
+                    const icone = document.createElement("i");
+                    icone.className = "bi bi-person-fill";
+                    avatar.appendChild(icone);
+                }
+                const status = document.createElement("span");
+                const online = usuarioEstaOnline(membro.id);
+                status.className = `status-membro ${online ? "online" : "offline"}`;
+                status.setAttribute("aria-label", online ? "Online" : "Offline");
+                avatar.appendChild(status);
+
+                const nome = document.createElement("span");
+                nome.textContent = membro.apelido;
+                const identificador = document.createElement("small");
+                identificador.textContent = `#${membro.id}`;
+                item.append(avatar, nome, identificador);
+                listaMembros.appendChild(item);
+            });
+        }
+
+        adicionarGrupoMembros("Online", membrosOnline);
+        adicionarGrupoMembros("Offline", membrosOffline);
+        const quantidadeMembros = document.getElementById("quantidade-membros");
+        if (quantidadeMembros) quantidadeMembros.textContent = String(membros.length);
     }
 
     function renderizarAmigosConvite(amigos) {
