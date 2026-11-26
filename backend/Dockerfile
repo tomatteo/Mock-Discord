@@ -2,7 +2,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund
+RUN npm ci --omit=dev --no-audit --no-fund --maxsockets=1
 COPY server.js ./
 
 ENV PORT=3001

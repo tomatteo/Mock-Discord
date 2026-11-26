@@ -43,6 +43,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      network: host
     container_name: mock-discord-backend
     environment:
       PHP_AUTH_URL: http://web/includes/socketAuth.php
