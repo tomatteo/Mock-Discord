@@ -199,15 +199,14 @@ try {
         $stmt->execute([':status' => $novoStatus, ':id' => $solicitacaoId]);
 
         if ($resposta === 'aceitar') {
+            $solicitanteId = (int) $solicitacao['id_usuario_solicitante'];
             $stmt = $pdo->prepare(
                 'INSERT INTO amizades (id_usuario_1, id_usuario_2)
-                 VALUES (LEAST(:atual_min, :solicitante_min), GREATEST(:atual_max, :solicitante_max))'
+                 VALUES (:menor_id, :maior_id)'
             );
             $stmt->execute([
-                ':atual_min' => $usuarioAtual,
-                ':solicitante_min' => $solicitacao['id_usuario_solicitante'],
-                ':atual_max' => $usuarioAtual,
-                ':solicitante_max' => $solicitacao['id_usuario_solicitante']
+                ':menor_id' => min($usuarioAtual, $solicitanteId),
+                ':maior_id' => max($usuarioAtual, $solicitanteId)
             ]);
         }
 
